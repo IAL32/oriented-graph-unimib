@@ -14,12 +14,5 @@ int main() {
     graph<char> g2 = g.remove_node('c');
     g2.print();
 
-    graph<char> g3 = g2.add_node('g');
-
-    g3[5][0] = 1;
-    g3[5][1] = 1;
-    g3[5][2] = 1;
-    g3.print();
-    g3.print_labels();
     return 0;
 }

@@ -42,7 +42,6 @@ private:
     void _del() {
         for (int i = 0; i < _size; i++) {
             delete[] _adj_matrix[i];
-            _adj_matrix[i] = 0;
         }
         delete[] _adj_matrix;
         delete[] _labels;
@@ -226,8 +225,6 @@ public:
 
         graph<T> newGraph(_size -1, labels);
         delete[] labels;
-        for (i = 0; i < _size - 1; i++)
-            newGraph[i] = new int[_size - 1];
         
         /**
          *   a b c d e f

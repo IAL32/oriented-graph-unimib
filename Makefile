@@ -4,7 +4,7 @@ LDFLAGS =  -fsanitize=address
 
 SRC = graph.h main.cpp
 OBJ = $(SRC:.cc=.o)
-EXEC = main
+EXEC = main.out
 
 all: $(EXEC)
 

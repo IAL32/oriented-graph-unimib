@@ -166,6 +166,16 @@ public:
         return _node_exists(label) > -1;
     }
 
+    bool hasEdge(T labelFrom, T labelTo) {
+        int index_from = _node_exists(labelFrom);
+        int index_to = _node_exists(labelTo);
+
+        if (index_from == -1 || index_to == -1)
+            return false;
+        
+        return _adj_matrix[index_from][index_to] == 1; 
+    }
+
     /**
      * @brief Creates a new graph with the new node
      * 
@@ -286,6 +296,183 @@ public:
             std::cout << _labels[i] << " ";
         std::cout << std::endl;
     }
+
+    class const_iterator;
+
+    class iterator {
+    public:
+        typedef std::forward_iterator_tag   iterator_category;
+        typedef ptrdiff_t                   difference_type;
+
+        iterator() : ptr(0), position(0) {}
+
+        iterator(const iterator &other)
+            : ptr(other.ptr), position(other.position) { }
+
+        iterator& operator=(const iterator &other) {
+            ptr = other.ptr;
+            position = other.position;
+            return *this;
+        }
+
+        ~iterator() {
+            ptr = 0;
+            position = 0;
+        }
+
+        int* operator*() const {
+            return (*ptr)[position];
+        }
+
+        int operator->() const {
+            return &((*ptr)[position]);
+        }
+
+        iterator operator++(int) {
+            iterator tmp(*this);
+            ++position;
+            return tmp;
+        }
+
+        iterator& operator++() {
+            ++position;
+            return *this;
+        }
+
+        bool operator==(const iterator &other) const {
+            return (ptr == other.ptr) && (position == other.position); 
+        }
+
+        bool operator !=(const iterator &other) const {
+            return !(*this == other);
+        }
+
+        friend class const_iterator;
+
+        bool operator==(const const_iterator &other) const {
+            return (ptr == other.ptr) && (position == other.position);
+        }
+
+        bool operator !=(const const_iterator &other) const {
+            return !(*this == other);
+        }
+    private:
+        graph* ptr;
+        int position;
+
+        friend class graph;
+
+        iterator(graph* p, int pos) : ptr(p), position(pos) { }
+    };
+
+    iterator begin() {
+        return iterator(this, 0);
+    }
+
+    iterator end() {
+        return iterator(this, _size);
+    }
+
+    class const_iterator {
+    
+    public:
+        typedef std::forward_iterator_tag   iterator_category;
+        typedef ptrdiff_t                   difference_type;
+
+        const_iterator() : ptr(0), position(0) { }
+
+        const_iterator(const const_iterator &other)
+            : ptr(other.ptr), position(other.position) { }
+        
+        const_iterator& operator=(const const_iterator &other) {
+            ptr = other.ptr;
+            position = other.position;
+            return *this;
+        }
+
+        ~const_iterator() {
+            ptr = 0;
+            position = 0;
+        }
+
+        int& operator*() const {
+            return (*ptr)[position];
+        }
+
+        int* operator->() const {
+            return &((*ptr)[position]);
+        }
+
+		const_iterator operator++(int) {
+			const_iterator tmp(*this);
+			position++;
+			return tmp;
+		}
+
+		const_iterator& operator++() {
+			position++;
+			return *this;
+		}
+
+		bool operator==(const const_iterator &other) const {
+			return (ptr == other.ptr) && (position == other.position);
+		}
+
+		bool operator!=(const const_iterator &other) const {
+			return !(*this==other);
+		}
+
+        friend class iterator;
+
+		bool operator==(const iterator &other) const {
+			return (ptr == other.ptr) && (position == other.position);
+		}
+
+		bool operator!=(const iterator &other) const {
+			return !(*this==other);
+		}
+
+		const_iterator(const iterator &other) 
+			: ptr(other.ptr), position(other.position) {			
+		}
+
+		const_iterator &operator=(const iterator &other) {
+			ptr = other.ptr;
+			position = other.position;
+			return *this;
+		}
+
+	private:
+		const graph *ptr;
+		int position;
+
+		// La classe container deve essere messa friend dell'iteratore per poter
+		// usare il costruttore di inizializzazione.
+		friend class graph; 
+
+		// Costruttore privato di inizializzazione usato dalla classe container
+		// tipicamente nei metodi begin e end
+		const_iterator(const graph *p, int pos) : ptr(p), position(pos) { }
+    };
+
+	const_iterator begin() const {
+		return const_iterator(this, 0);
+	}
+	
+	const_iterator end() const {
+		return const_iterator(this, _size);
+	}
 };
+
+template <typename T>
+std::ostream &operator<<(std::ostream &os, 
+	const graph<T> &db) {
+
+	os << "size: " << db.size() << std::endl;
+	for (int i = 0; i < db.size(); ++i)
+		os << db[i] << " ";
+
+	return os;
+}
 
 #endif

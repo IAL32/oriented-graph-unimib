@@ -21,16 +21,15 @@ private:
     /**
      * @brief Initializes everything in the graph class
      * 
-     * @param size 
+     * @param size The graph size
      */
     void init(int size, T* labels) {
-        int i, j;
         _adj_matrix = new int*[size];
         _labels = new T[size];
-        for (i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             _adj_matrix[i] = new int[size];
             _labels[i] = labels[i];
-            for (j = 0; j < size; j++)
+            for (int j = 0; j < size; j++)
                 _adj_matrix[i][j] = 0;
         }
         _size = size;
@@ -41,10 +40,14 @@ private:
      * 
      */
     void _del() {
-        for (int i = 0; i < _size; i++)
+        for (int i = 0; i < _size; i++) {
             delete[] _adj_matrix[i];
+            _adj_matrix[i] = 0;
+        }
         delete[] _adj_matrix;
         delete[] _labels;
+        _adj_matrix = 0;
+        _labels = 0;
         _size = 0;
     }
 
@@ -179,7 +182,6 @@ public:
         }
 
         T* labels = new T[_size + 1];
-        int** adj_matrix = new int*[_size + 1];
 
         for (int i = 0; i < _size; i++)
             labels[i] = _labels[i];
@@ -188,7 +190,6 @@ public:
         graph<T> newGraph(_size + 1, labels);
 
         for (int i = 0; i < _size + 1; i++) {
-            newGraph[i] = new int[size];
             for (int j = 0; j < _size + 1; j++) {
                 if (i < _size && j < _size)
                     newGraph[i][j] = _adj_matrix[i][j];
@@ -196,7 +197,8 @@ public:
                     newGraph[i][j] = 0;
             }
         }
-
+        
+        delete[] labels;
         return newGraph;
     }
 

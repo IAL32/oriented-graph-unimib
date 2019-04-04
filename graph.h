@@ -95,9 +95,14 @@ public:
      * @param index 
      * @return int*& 
      */
-    int* &operator[](int index) {
+    T &operator[](int index) {
         assert(index < _size);
-        return _adj_matrix[index];
+        return _labels[index];
+    }
+
+    const T &operator[](int index) const {
+        assert(index < _size);
+        return _labels[index];
     }
 
     /**
@@ -201,9 +206,9 @@ public:
         for (int i = 0; i < _size + 1; i++) {
             for (int j = 0; j < _size + 1; j++) {
                 if (i < _size && j < _size)
-                    newGraph[i][j] = _adj_matrix[i][j];
+                    newGraph.setCell(i, j, _adj_matrix[i][j]);
                 else
-                    newGraph[i][j] = 0;
+                    newGraph.setCell(i, j, 0);
             }
         }
         
@@ -259,28 +264,57 @@ public:
         if (node_index == _size - 1) {
             for (i = 0; i < _size - 1; i++)
                 for (j = 0; j < _size - 1; j++)
-                    newGraph[i][j] = _adj_matrix[i][j];
+                    newGraph.setCell(i, j, _adj_matrix[i][j]);
         } else {
             // first step
             for (i = 0; i < node_index; i++)
                 for (j = 0; j < node_index; j++)
-                    newGraph[i][j] = _adj_matrix[i][j];
+                    newGraph.setCell(i, j, _adj_matrix[i][j]);
+
             // fourth step
             for (i = node_index + 1; i < _size; i++)
                 for (j = node_index + 1; j < _size; j++)
-                    newGraph[i - 1][j - 1] = _adj_matrix[i][j];
+                    newGraph.setCell(i - 1, j - 1, _adj_matrix[i][j]);
         
             // second step
             for (i = 0; i < node_index; i++)
                 for (j = node_index + 1; j < _size; j++)
-                    newGraph[i][j - 1] = _adj_matrix[i][j];
+                    newGraph.setCell(i, j - 1, _adj_matrix[i][j]);
 
             // third step
             for (i = node_index + 1; i < _size; i++)
                 for (j = 0; j < node_index; j++)
-                    newGraph[i - 1][j] = _adj_matrix[i][j];
+                    newGraph.setCell(i - 1, j, _adj_matrix[i][j]);
         }
         return newGraph;
+    }
+
+    /**
+     * @brief Set the Arch object
+     * 
+     * @param labelFrom 
+     * @param labelTo 
+     * @param value 
+     */
+    void setArch(T labelFrom, T labelTo, int value) {
+        int index_from = _node_exists(labelFrom);
+        int index_to = _node_exists(labelTo);
+        assert(index_from > -1 && index_to > -1);
+
+        setCell(index_from, index_to, value);
+    }
+
+    /**
+     * @brief Set the Cell object
+     * 
+     * @param indexFrom 
+     * @param indexTo 
+     * @param value 
+     */
+    void setCell(int indexFrom, int indexTo, int value) {
+        assert(indexFrom < _size && indexTo < _size);
+        assert(_is_node_value_valid(value));
+        _adj_matrix[indexFrom][indexTo] = value;
     }
 
     void print() {
@@ -296,181 +330,165 @@ public:
             std::cout << _labels[i] << " ";
         std::cout << std::endl;
     }
+	
+	class const_iterator {	
+	public:
+		typedef std::forward_iterator_tag iterator_category;
+		typedef T                         value_type;
+		typedef ptrdiff_t                 difference_type;
+		typedef const T*                  pointer;
+		typedef const T&                  reference;
 
-    class const_iterator;
+        /**
+         * @brief Construct a new const iterator object
+         * 
+         */
+		const_iterator() : ptr(0), position(0) {}
+		
+        /**
+         * @brief Construct a new const iterator object
+         * 
+         * @param other 
+         */
+		const_iterator(const const_iterator &other) : ptr(other.ptr), position(other.position) {}
 
-    class iterator {
-    public:
-        typedef std::forward_iterator_tag   iterator_category;
-        typedef ptrdiff_t                   difference_type;
+        /**
+         * @brief 
+         * 
+         * @param other 
+         * @return const_iterator& 
+         */
+		const_iterator& operator=(const const_iterator &other) {
+			ptr = other.ptr;
+			position = other.position;
+			return *this;
+		}
 
-        iterator() : ptr(0), position(0) {}
+        /**
+         * @brief Destroy the const iterator object
+         * 
+         */
+		~const_iterator() {
+			ptr = 0;
+			position = 0;
+		}
 
-        iterator(const iterator &other)
-            : ptr(other.ptr), position(other.position) { }
+		/**
+		 * @brief 
+		 * 
+		 * @return reference 
+		 */
+		reference operator*() const {
+			return (*ptr)[position];
+		}
 
-        iterator& operator=(const iterator &other) {
-            ptr = other.ptr;
-            position = other.position;
-            return *this;
-        }
-
-        ~iterator() {
-            ptr = 0;
-            position = 0;
-        }
-
-        int* operator*() const {
-            return (*ptr)[position];
-        }
-
-        int operator->() const {
-            return &((*ptr)[position]);
-        }
-
-        iterator operator++(int) {
-            iterator tmp(*this);
-            ++position;
-            return tmp;
-        }
-
-        iterator& operator++() {
-            ++position;
-            return *this;
-        }
-
-        bool operator==(const iterator &other) const {
-            return (ptr == other.ptr) && (position == other.position); 
-        }
-
-        bool operator !=(const iterator &other) const {
-            return !(*this == other);
-        }
-
-        friend class const_iterator;
-
-        bool operator==(const const_iterator &other) const {
-            return (ptr == other.ptr) && (position == other.position);
-        }
-
-        bool operator !=(const const_iterator &other) const {
-            return !(*this == other);
-        }
-    private:
-        graph* ptr;
-        int position;
-
-        friend class graph;
-
-        iterator(graph* p, int pos) : ptr(p), position(pos) { }
-    };
-
-    iterator begin() {
-        return iterator(this, 0);
-    }
-
-    iterator end() {
-        return iterator(this, _size);
-    }
-
-    class const_iterator {
-    
-    public:
-        typedef std::forward_iterator_tag   iterator_category;
-        typedef ptrdiff_t                   difference_type;
-
-        const_iterator() : ptr(0), position(0) { }
-
-        const_iterator(const const_iterator &other)
-            : ptr(other.ptr), position(other.position) { }
-        
-        const_iterator& operator=(const const_iterator &other) {
-            ptr = other.ptr;
-            position = other.position;
-            return *this;
-        }
-
-        ~const_iterator() {
-            ptr = 0;
-            position = 0;
-        }
-
-        int& operator*() const {
-            return (*ptr)[position];
-        }
-
-        int* operator->() const {
-            return &((*ptr)[position]);
-        }
-
+		/**
+		 * @brief 
+		 * 
+		 * @return pointer 
+		 */
+		pointer operator->() const {
+			return &((*ptr)[position]);
+		}
+		
+		/**
+		 * @brief 
+		 * 
+		 * @return const_iterator 
+		 */
 		const_iterator operator++(int) {
 			const_iterator tmp(*this);
 			position++;
 			return tmp;
 		}
 
+		/**
+		 * @brief 
+		 * 
+		 * @return const_iterator& 
+		 */
 		const_iterator& operator++() {
 			position++;
 			return *this;
 		}
 
+		/**
+		 * @brief 
+		 * 
+		 * @param other 
+		 * @return true 
+		 * @return false 
+		 */
 		bool operator==(const const_iterator &other) const {
 			return (ptr == other.ptr) && (position == other.position);
 		}
-
+		
+		/**
+		 * @brief 
+		 * 
+		 * @param other 
+		 * @return true 
+		 * @return false 
+		 */
 		bool operator!=(const const_iterator &other) const {
-			return !(*this==other);
+			return !(*this == other);
 		}
 
-        friend class iterator;
-
-		bool operator==(const iterator &other) const {
-			return (ptr == other.ptr) && (position == other.position);
-		}
-
-		bool operator!=(const iterator &other) const {
-			return !(*this==other);
-		}
-
-		const_iterator(const iterator &other) 
-			: ptr(other.ptr), position(other.position) {			
-		}
-
-		const_iterator &operator=(const iterator &other) {
-			ptr = other.ptr;
-			position = other.position;
-			return *this;
-		}
 
 	private:
 		const graph *ptr;
 		int position;
 
-		// La classe container deve essere messa friend dell'iteratore per poter
-		// usare il costruttore di inizializzazione.
 		friend class graph; 
 
-		// Costruttore privato di inizializzazione usato dalla classe container
-		// tipicamente nei metodi begin e end
+		/**
+		 * @brief Construct a new const iterator object
+		 * 
+		 * @param p 
+		 * @param pos 
+		 */
 		const_iterator(const graph *p, int pos) : ptr(p), position(pos) { }
-    };
-
+				
+	};
+	
+	/**
+	 * @brief 
+	 * 
+	 * @return const_iterator 
+	 */
 	const_iterator begin() const {
-		return const_iterator(this, 0);
+		return const_iterator(this,0);
 	}
 	
+	/**
+	 * @brief 
+	 * 
+	 * @return const_iterator 
+	 */
 	const_iterator end() const {
-		return const_iterator(this, _size);
+		return const_iterator(this,_size);
 	}
+
 };
 
+
+/**
+	@brief Operatore di stream
+
+	Permette di spedire su uno stream di output il contenuto dell'array generico.
+	E' una funzione templata perche' il parametro relativo a dbufferT e' templato
+
+	@param os stream di output
+	@param g graph da utilizzare
+	@return Il riferimento allo stream di output
+**/
 template <typename T>
 std::ostream &operator<<(std::ostream &os, 
-	const graph<T> &db) {
+	const graph<T> &g) {
 
-	os << "size: " << db.size() << std::endl;
-	for (int i = 0; i < db.size(); ++i)
-		os << db[i] << " ";
+	os << "size: " << g.size() << std::endl;
+	for (int i = 0; i < g.size(); ++i)
+		os << g[i] << " ";
 
 	return os;
 }

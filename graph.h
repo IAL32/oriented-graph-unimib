@@ -50,10 +50,23 @@ private:
         _size = 0;
     }
 
+    /**
+     * @brief 
+     * 
+     * @param value 
+     * @return true 
+     * @return false 
+     */
     bool _is_node_value_valid(int value) {
         return (value == 0 || value == 1);
     }
-
+    
+    /**
+     * @brief 
+     * 
+     * @param label 
+     * @return int 
+     */
     int _node_exists(T label) {
         for (int i = 0; i < _size; i++) {
             if (_labels[i] == label)
@@ -330,7 +343,7 @@ public:
             std::cout << _labels[i] << " ";
         std::cout << std::endl;
     }
-	
+
 	class const_iterator {	
 	public:
 		typedef std::forward_iterator_tag iterator_category;
@@ -450,7 +463,7 @@ public:
 		const_iterator(const graph *p, int pos) : ptr(p), position(pos) { }
 				
 	};
-	
+
 	/**
 	 * @brief 
 	 * 

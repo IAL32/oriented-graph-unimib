@@ -4,12 +4,16 @@
 #include <iostream>
 #include <assert.h>
 
+class EdgeNotFoundException {};
+
+class DuplicateException {};
+
 /**
  * @brief Template per il tipo dei label
  * 
  * @tparam T=int 
  */
-template <typename T=int>
+template <typename T, typename E>
 
 class graph {
 
@@ -17,6 +21,7 @@ private:
     int _size;
     int** _adj_matrix;
     T* _labels;
+    E _isEqual;
 
     /**
      * @brief Initializes everything in the graph class
@@ -60,7 +65,7 @@ private:
     bool _is_node_value_valid(int value) {
         return (value == 0 || value == 1);
     }
-    
+
     /**
      * @brief 
      * 
@@ -68,11 +73,21 @@ private:
      * @return int 
      */
     int _node_exists(T label) {
-        for (int i = 0; i < _size; i++) {
-            if (_labels[i] == label)
-               return i; 
+        graph<T, E>::const_iterator i, ie;
+        int index;
+        for (i = begin(), ie = end(), index = 0; i != ie; ++i, index++) {
+            if (_isEqual(*i, label))
+               return index;
         }
         return -1;
+    }
+
+    bool _arch_exists(T labelFrom, T labelTo) {
+        return (_node_exists(labelFrom) && _node_exists(labelTo));
+    }
+
+    bool _arch_exists(int indexFrom, int indexTo) {
+        return (i >= 0 && i < _size && j >= 0 && j < _size);
     }
 
 public:
@@ -89,7 +104,7 @@ public:
     /**
      * @brief Construct a new graph object
      * 
-     * @param size 
+     * @param size
      */
     explicit graph(int size, T* labels) : _size(0), _adj_matrix(0), _labels(0) {
         #ifndef NDEBUG
@@ -141,11 +156,10 @@ public:
         #endif
 
         init(other._size, other._labels);
-        /* TODO: aggiornare con iterator
         for (int i = 0; i < _size; i++)
             for (int j = 0; j < _size; j++)
-                _adj_matrix[i][j] = other[i][j];
-        */
+                _adj_matrix[i][j] = other.getArch(i, j);
+        
     }
 
     /**
@@ -185,12 +199,8 @@ public:
     }
 
     bool hasEdge(T labelFrom, T labelTo) {
-        int index_from = _node_exists(labelFrom);
-        int index_to = _node_exists(labelTo);
-
-        if (index_from == -1 || index_to == -1)
-            return false;
-        
+        if (!_arch_exists(labelFrom, labelTo))
+            throw EdgeNotFoundException();
         return _adj_matrix[index_from][index_to] == 1; 
     }
 
@@ -198,31 +208,35 @@ public:
      * @brief Creates a new graph with the new node
      * 
      * @param label The node unique label
-     * @return graph<T> 
+     * @return graph<T, E> 
      */
-    graph<T> add_node(T label) {
+    graph<T, E> add_node(T label) {
         if (exists(label)) {
             #ifndef NDEBUG
             std::cout << "Node exists! Error." << std::endl;
             #endif
-            throw;
+            throw DuplicateException();
         }
 
-        T* labels = new T[_size + 1];
+        try {
+            T* labels = new T[_size + 1];
 
-        for (int i = 0; i < _size; i++)
-            labels[i] = _labels[i];
-        labels[_size] = label;
+            for (int i = 0; i < _size; i++)
+                labels[i] = _labels[i];
+            labels[_size] = label;
 
-        graph<T> newGraph(_size + 1, labels);
+            graph<T, E> newGraph(_size + 1, labels);
 
-        for (int i = 0; i < _size + 1; i++) {
-            for (int j = 0; j < _size + 1; j++) {
-                if (i < _size && j < _size)
-                    newGraph.setCell(i, j, _adj_matrix[i][j]);
-                else
-                    newGraph.setCell(i, j, 0);
+            for (int i = 0; i < _size + 1; i++) {
+                for (int j = 0; j < _size + 1; j++) {
+                    if (i < _size && j < _size)
+                        newGraph.setCell(i, j, _adj_matrix[i][j]);
+                    else
+                        newGraph.setCell(i, j, 0);
+                }
             }
+        } catch(...) {
+
         }
         
         delete[] labels;
@@ -233,9 +247,9 @@ public:
      * @brief Removes a node from the grap
      * 
      * @param label The node to remove from the graph
-     * @return graph<T> The new graph without the node
+     * @return graph<T, E> The new graph without the node
      */
-    graph<T> remove_node(T label) {
+    graph<T, E> remove_node(T label) {
         int node_index = _node_exists(label);
         if (node_index == -1) {
             throw;
@@ -251,7 +265,7 @@ public:
                 labels[i - 1] = _labels[i];
         }
 
-        graph<T> newGraph(_size -1, labels);
+        graph<T, E> newGraph(_size -1, labels);
         delete[] labels;
         
         /**
@@ -312,8 +326,7 @@ public:
     void setArch(T labelFrom, T labelTo, int value) {
         int index_from = _node_exists(labelFrom);
         int index_to = _node_exists(labelTo);
-        assert(index_from > -1 && index_to > -1);
-
+        
         setCell(index_from, index_to, value);
     }
 
@@ -328,6 +341,12 @@ public:
         assert(indexFrom < _size && indexTo < _size);
         assert(_is_node_value_valid(value));
         _adj_matrix[indexFrom][indexTo] = value;
+    }
+
+    int getArch(int i, int j) {
+        if (i < 0 || i > _size - 1 || j < 0 || j > _size - 1)
+            throw EdgeNotFoundException();
+        return _adj_matrix[i][j];
     }
 
     void print() {
@@ -470,7 +489,7 @@ public:
 	 * @return const_iterator 
 	 */
 	const_iterator begin() const {
-		return const_iterator(this,0);
+		return const_iterator(this, 0);
 	}
 	
 	/**
@@ -479,7 +498,7 @@ public:
 	 * @return const_iterator 
 	 */
 	const_iterator end() const {
-		return const_iterator(this,_size);
+		return const_iterator(this, _size);
 	}
 
 };
@@ -495,14 +514,14 @@ public:
 	@param g graph da utilizzare
 	@return Il riferimento allo stream di output
 **/
-template <typename T>
+template <typename T, typename E>
 std::ostream &operator<<(std::ostream &os, 
-	const graph<T> &g) {
+	const graph<T, E> &g) {
 
+    typename graph<T, E>::const_iterator i, ie;
 	os << "size: " << g.size() << std::endl;
-	for (int i = 0; i < g.size(); ++i)
-		os << g[i] << " ";
-
+	for (i = g.begin(), ie = g.end(); i != ie; ++i)
+		os << *i << " ";
 	return os;
 }
 

@@ -1,20 +1,26 @@
 #include <iostream>
 #include "graph.h"
 
+struct _isEqualsChar {
+    bool operator()(char a, char b) {
+        return a == b;
+    }
+};
+
 int main() {
 
     char labels[] = {'a','b','c','d','e','f'};
-    graph<char> g(6, labels);
+    graph<char, _isEqualsChar> g(6, labels);
 
     g.setArch('a', 'b', 1);
     g.setCell(2, 3, 1);
     g.setCell(3, 0, 1);
 
     g.print();
-    graph<char> g2 = g.remove_node('c');
+    graph<char, _isEqualsChar> g2 = g.remove_node('c');
     g2.print();
 
-    graph<char> g3 = g2.add_node('g');
+    graph<char, _isEqualsChar> g3 = g2.add_node('g');
 
     g3.setCell(5, 0, 1);
     g3.setCell(5, 1, 1);
@@ -27,7 +33,7 @@ int main() {
 
     // iterator
 
-    graph<char>::const_iterator it, ite;
+    graph<char, _isEqualsChar>::const_iterator it, ite;
 
     it = g3.begin();
     ite = g3.end();

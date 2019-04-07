@@ -30,10 +30,9 @@ private:
      */
     void init(int size, T* labels) {
         _adj_matrix = new int*[size];
-        _labels = new T[size];
+        _labels = labels;
         for (int i = 0; i < size; i++) {
             _adj_matrix[i] = new int[size];
-            _labels[i] = labels[i];
             for (int j = 0; j < size; j++)
                 _adj_matrix[i][j] = 0;
         }
@@ -45,14 +44,12 @@ private:
      * 
      */
     void _del() {
-        for (int i = 0; i < _size; i++) {
+        for (int i = 0; i < _size; i++)
             delete[] _adj_matrix[i];
-        }
         delete[] _adj_matrix;
         delete[] _labels;
         _adj_matrix = 0;
         _labels = 0;
-        _size = 0;
     }
 
     /**
@@ -87,7 +84,7 @@ private:
     }
 
     bool _arch_exists(int indexFrom, int indexTo) {
-        return (i >= 0 && i < _size && j >= 0 && j < _size);
+        return (indexFrom >= 0 && indexFrom < _size && indexTo >= 0 && indexTo < _size);
     }
 
 public:
@@ -114,6 +111,11 @@ public:
     }
 
     graph& operator=(const graph &other) {
+        if (&other != this) {
+            graph tmp(other);
+            std::swap(tmp._adj_matrix, _adj_matrix);
+            std::swap(tmp._labels, _labels);
+        }
         return *this;
     }
 
@@ -128,8 +130,9 @@ public:
         return _labels[index];
     }
 
-    const T &operator[](int index) const {
+    const T &operator[](const unsigned int index) const {
         assert(index < _size);
+        assert(index >= 0);
         return _labels[index];
     }
 
@@ -158,7 +161,7 @@ public:
         init(other._size, other._labels);
         for (int i = 0; i < _size; i++)
             for (int j = 0; j < _size; j++)
-                _adj_matrix[i][j] = other.getArch(i, j);
+                _adj_matrix[i][j] = other._adj_matrix[i][j];
         
     }
 
@@ -199,9 +202,7 @@ public:
     }
 
     bool hasEdge(T labelFrom, T labelTo) {
-        if (!_arch_exists(labelFrom, labelTo))
-            throw EdgeNotFoundException();
-        return _adj_matrix[index_from][index_to] == 1; 
+        return getArch(labelFrom, labelTo) == 1; 
     }
 
     /**
@@ -210,7 +211,7 @@ public:
      * @param label The node unique label
      * @return graph<T, E> 
      */
-    graph<T, E> add_node(T label) {
+    void add_node(T label) {
         if (exists(label)) {
             #ifndef NDEBUG
             std::cout << "Node exists! Error." << std::endl;
@@ -218,29 +219,32 @@ public:
             throw DuplicateException();
         }
 
-        try {
-            T* labels = new T[_size + 1];
+        int i, j;
+        T* labels = new T[_size + 1];
+        int** adj_matrix = new int*[_size + 1];
 
-            for (int i = 0; i < _size; i++)
-                labels[i] = _labels[i];
-            labels[_size] = label;
-
-            graph<T, E> newGraph(_size + 1, labels);
-
-            for (int i = 0; i < _size + 1; i++) {
-                for (int j = 0; j < _size + 1; j++) {
-                    if (i < _size && j < _size)
-                        newGraph.setCell(i, j, _adj_matrix[i][j]);
-                    else
-                        newGraph.setCell(i, j, 0);
-                }
-            }
-        } catch(...) {
-
+        for (i = 0; i < _size; i++) {
+            labels[i] = _labels[i];
+            adj_matrix[i] = new int[_size + 1];
+            for (j = 0; j < _size; j++)
+                adj_matrix[i][j] = _adj_matrix[i][j];
         }
-        
+        labels[_size] = label;
+        adj_matrix[_size] = new int[_size + 1];
+        for (i = 0; i < _size + 1; i++)
+            adj_matrix[i][_size] = 0;
+        for (j = 0; j < _size + 1; j++)
+            adj_matrix[_size][j] = 0;
+
+        std::swap(adj_matrix, _adj_matrix);
+        std::swap(labels, _labels);
+
         delete[] labels;
-        return newGraph;
+        for (i = 0; i < _size; i++)
+            delete[] adj_matrix[i];
+        delete[] adj_matrix;
+
+        _size = _size + 1;
     }
 
     /**
@@ -249,25 +253,25 @@ public:
      * @param label The node to remove from the graph
      * @return graph<T, E> The new graph without the node
      */
-    graph<T, E> remove_node(T label) {
+    void remove_node(T label) {
         int node_index = _node_exists(label);
         if (node_index == -1) {
             throw;
         }
 
-        T* labels = new T[_size - 1];
         int i, j;
+        T* labels = new T[_size - 1];
+        int** adj_matrix = new int*[_size - 1];
 
-        for (i = 0; i < node_index; i++)
+        for (i = 0; i < _size; i++)
             labels[i] = _labels[i];
+        for (i = 0; i < node_index; i++)
+            adj_matrix[i] = new int[_size -1];
         if (node_index < _size - 1) {
             for (i = node_index + 1; i < _size; i++)
-                labels[i - 1] = _labels[i];
+                adj_matrix[i - 1] = new int[_size -1];
         }
 
-        graph<T, E> newGraph(_size -1, labels);
-        delete[] labels;
-        
         /**
          *   a b c d e f
          * a 0 1 0 1 0 0
@@ -291,29 +295,37 @@ public:
         if (node_index == _size - 1) {
             for (i = 0; i < _size - 1; i++)
                 for (j = 0; j < _size - 1; j++)
-                    newGraph.setCell(i, j, _adj_matrix[i][j]);
+                    adj_matrix[i][j] = _adj_matrix[i][j];
         } else {
             // first step
             for (i = 0; i < node_index; i++)
                 for (j = 0; j < node_index; j++)
-                    newGraph.setCell(i, j, _adj_matrix[i][j]);
+                    adj_matrix[i][j] = _adj_matrix[i][j];
 
             // fourth step
             for (i = node_index + 1; i < _size; i++)
                 for (j = node_index + 1; j < _size; j++)
-                    newGraph.setCell(i - 1, j - 1, _adj_matrix[i][j]);
+                    adj_matrix[i - 1][j - 1] = _adj_matrix[i][j];
         
             // second step
             for (i = 0; i < node_index; i++)
                 for (j = node_index + 1; j < _size; j++)
-                    newGraph.setCell(i, j - 1, _adj_matrix[i][j]);
+                    adj_matrix[i][j - 1] = _adj_matrix[i][j];
 
             // third step
             for (i = node_index + 1; i < _size; i++)
                 for (j = 0; j < node_index; j++)
-                    newGraph.setCell(i - 1, j, _adj_matrix[i][j]);
+                    adj_matrix[i - 1][j] = _adj_matrix[i][j];
         }
-        return newGraph;
+        std::swap(labels, _labels);
+        std::swap(adj_matrix, _adj_matrix);
+
+        delete[] labels;
+        for (i = 0; i < _size; i++)
+            delete[] adj_matrix[i];
+        delete[] adj_matrix;
+
+        _size = _size - 1;
     }
 
     /**
@@ -347,6 +359,13 @@ public:
         if (i < 0 || i > _size - 1 || j < 0 || j > _size - 1)
             throw EdgeNotFoundException();
         return _adj_matrix[i][j];
+    }
+
+    int getArch(T labelFrom, T labelTo) {
+        int indexFrom, indexTo;
+        indexFrom = _node_exists(labelFrom);
+        indexTo = _node_exists(labelTo);
+        return getArch(indexFrom, indexTo);
     }
 
     void print() {
@@ -519,7 +538,6 @@ std::ostream &operator<<(std::ostream &os,
 	const graph<T, E> &g) {
 
     typename graph<T, E>::const_iterator i, ie;
-	os << "size: " << g.size() << std::endl;
 	for (i = g.begin(), ie = g.end(); i != ie; ++i)
 		os << *i << " ";
 	return os;

@@ -30,9 +30,10 @@ private:
      */
     void init(int size, T* labels) {
         _adj_matrix = new int*[size];
-        _labels = labels;
+        _labels = new T[size];
         for (int i = 0; i < size; i++) {
             _adj_matrix[i] = new int[size];
+            _labels[i] = labels[i];
             for (int j = 0; j < size; j++)
                 _adj_matrix[i][j] = 0;
         }
@@ -50,6 +51,7 @@ private:
         delete[] _labels;
         _adj_matrix = 0;
         _labels = 0;
+        _size = 0;
     }
 
     /**
@@ -115,6 +117,7 @@ public:
             graph tmp(other);
             std::swap(tmp._adj_matrix, _adj_matrix);
             std::swap(tmp._labels, _labels);
+            std::swap(tmp._size, _size);
         }
         return *this;
     }
@@ -236,13 +239,15 @@ public:
         for (j = 0; j < _size + 1; j++)
             adj_matrix[_size][j] = 0;
 
-        std::swap(adj_matrix, _adj_matrix);
         std::swap(labels, _labels);
+        std::swap(adj_matrix, _adj_matrix);
 
         delete[] labels;
         for (i = 0; i < _size; i++)
             delete[] adj_matrix[i];
         delete[] adj_matrix;
+        labels = 0;
+        adj_matrix = 0;
 
         _size = _size + 1;
     }
@@ -262,13 +267,12 @@ public:
         int i, j;
         T* labels = new T[_size - 1];
         int** adj_matrix = new int*[_size - 1];
-
-        for (i = 0; i < _size; i++)
+        for (i = 0; i < node_index; i++) {
             labels[i] = _labels[i];
-        for (i = 0; i < node_index; i++)
             adj_matrix[i] = new int[_size -1];
-        if (node_index < _size - 1) {
-            for (i = node_index + 1; i < _size; i++)
+        }
+        for (i = node_index + 1; i < _size; i++) {
+                labels[i - 1] = _labels[i];
                 adj_matrix[i - 1] = new int[_size -1];
         }
 

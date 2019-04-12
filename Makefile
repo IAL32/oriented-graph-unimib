@@ -1,7 +1,7 @@
 CXX = g++
 #LDFLAGS = -fsanitize=address
 
-SRC = graph.h main.cpp
+SRC = graph.h main.cpp voce.h voce.cpp
 OBJ = $(SRC:.cc=.o)
 EXEC = main.out
 

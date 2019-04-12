@@ -71,21 +71,18 @@ private:
      * @param label 
      * @return int 
      */
-    int _node_exists(T label) {
-        graph<T, E>::const_iterator i, ie;
-        int index;
-        for (i = begin(), ie = end(), index = 0; i != ie; ++i, index++) {
-            if (_isEqual(*i, label))
-               return index;
-        }
+    int _node_exists(const T label) {
+        for (int i = 0; i < _size; i++)
+            if (_isEqual(_labels[i], label))
+                return i;
         return -1;
     }
 
-    bool _arch_exists(T labelFrom, T labelTo) {
+    bool _arch_exists(const T labelFrom, const T labelTo) const {
         return (_node_exists(labelFrom) && _node_exists(labelTo));
     }
 
-    bool _arch_exists(int indexFrom, int indexTo) {
+    bool _arch_exists(const int indexFrom, const int indexTo) const {
         return (indexFrom >= 0 && indexFrom < _size && indexTo >= 0 && indexTo < _size);
     }
 

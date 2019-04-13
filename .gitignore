@@ -33,4 +33,5 @@
 *.autosave
 
 .vscode/
+Qt/build-Qt-Desktop-Debug/
 build-Qt-Desktop_Qt_5_12_2_GCC_64bit-Debug/

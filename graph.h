@@ -2,11 +2,19 @@
 #define GRAPH_H
 
 #include <iostream>
-#include <assert.h>
+#include <exception>
 
-class EdgeNotFoundException {};
+class EdgeNotFoundException: public std::exception {
+    virtual const char* what() const throw() {
+        return "Edge was not found";
+    }
+};
 
 class DuplicateException {};
+
+class IndexOutOfBoundsException {};
+
+class NodeValueNotValidException {};
 
 /**
  * @brief Template per il tipo dei label
@@ -126,13 +134,14 @@ public:
      * @return int*& 
      */
     T &operator[](int index) {
-        assert(index < _size);
+        if (!(index < _size))
+            throw IndexOutOfBoundsException();
         return _labels[index];
     }
 
     const T &operator[](const unsigned int index) const {
-        assert(index < _size);
-        assert(index >= 0);
+        if(!(index >= 0 && index < _size))
+            throw IndexOutOfBoundsException();
         return _labels[index];
     }
 
@@ -351,8 +360,10 @@ public:
      * @param value 
      */
     void setCell(int indexFrom, int indexTo, int value) {
-        assert(indexFrom < _size && indexTo < _size);
-        assert(_is_node_value_valid(value));
+        if (!(indexFrom < _size && indexTo < _size))
+            throw IndexOutOfBoundsException();
+        if (!_is_node_value_valid(value))
+            throw NodeValueNotValidException();
         _adj_matrix[indexFrom][indexTo] = value;
     }
 

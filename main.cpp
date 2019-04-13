@@ -81,6 +81,16 @@ int main() {
     assert(g.archs() == 1);
 
     test(unitnumber, testnumber++);
+    try {
+        g2.getArch(2,2);
+    } catch(...) { }
+
+    test(unitnumber, testnumber++);
+    try {
+        g2.setCell(3, 3, 1);
+    } catch(...) { }
+
+    test(unitnumber, testnumber++);
     graph<char, _isEqualsChar>::const_iterator i, ie;
 
     test(unitnumber, testnumber++);

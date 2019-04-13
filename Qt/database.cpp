@@ -1,26 +1,68 @@
 #include <database.h>
 
-database::database(void) : _users(0) {  }
+void database::init(std::string sourceFilename) {
+    std::ifstream input(sourceFilename);
+    std::list<user> users;
+    for (std::string line; getline(input, line);) {
+        users.push_back(user::fromString(line));
+    }
+    input.close();
 
-database::~database(void) {
-    _sourceFilename = nullptr;
-}
-
-database::database(std::string sourceFilename) {
     _sourceFilename = sourceFilename;
-}
-
-database::database(std::list<user> users) {
     _users = users;
 }
 
-void database::addUser(user u) {
+database::database(void) : _users(0), _sourceFilename(nullptr) {  }
+
+database::database(std::string sourceFilename) {
+    init(sourceFilename);
+}
+
+std::list<user> database::getUsers() {
+    return _users;
+}
+
+void database::addUser(const user u) {
     if (userExists(u))
-        throw UsernameAlreadyRegisteredException();
+        throw UserAlreadyRegisteredException();
     _users.push_back(u);
 }
 
-bool database::userExists(user u) {
+user* database::findUserByPhoneNumber(std::string phoneNumber) {
+    if (!user::isPhoneNumber(phoneNumber))
+        throw PhoneNumberFormatNotValidException();
+    std::list<user>::iterator i, ie;
+    for (i = _users.begin(), ie = _users.end(); i != ie; i++)
+        if (i->getPhoneNumber() == phoneNumber)
+            return &(*i);
+    return nullptr;
+}
+
+bool database::userExistsByPhoneNumber(const std::string phoneNumber) {
+    if (!user::isPhoneNumber(phoneNumber))
+        throw PhoneNumberFormatNotValidException();
+
+    std::list<user>::const_iterator i, ie;
+
+    for (i = _users.begin(), ie = _users.end(); i != ie; ++i)
+        if (i->getPhoneNumber() == phoneNumber)
+            return true;
+    return false;
+}
+
+bool database::userExistsByEmail(const std::string email) {
+    if (!user::isEmail(email))
+        throw EmailFormatNotValidException();
+
+    std::list<user>::const_iterator i, ie;
+
+    for (i = _users.begin(), ie = _users.end(); i != ie; ++i)
+        if (i->getEmail() == email)
+            return true;
+    return false;
+}
+
+bool database::userExists(const user u) {
     std::list<user>::const_iterator i, ie;
     for (i = _users.begin(), ie = _users.end(); i != ie; ++i) {
         if (u.getPhoneNumber() == i->getPhoneNumber())

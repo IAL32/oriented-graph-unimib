@@ -5,12 +5,11 @@
 #include <iostream>
 #include <list>
 #include <algorithm>
+#include <fstream>
 
-class UsernameAlreadyRegisteredException {};
+class UserAlreadyRegisteredException {};
 
-class EmailAlreadyRegisteredException {};
-
-class PasswordNotCorrectException {};
+class CredentialsNotCorrectException {};
 
 class UserNotFoundException {};
 
@@ -20,37 +19,31 @@ private:
     std::list<user> _users;
     std::string _sourceFilename;
 
-    void init(std::string );
+    void init(std::string sourceFilename);
 
 public:
 
     database();
 
-    ~database();
-
     database(const database &other);
-
-    explicit database(std::list<user> users);
 
     explicit database(std::string sourceFilename);
 
-    unsigned int getCount(void) const;
-
-    std::list<user> getUsers(void) const;
-
-    user getUser(unsigned int index);
+    std::list<user> getUsers(void);
 
     void addUser(user u);
 
-    bool userExistsByPhoneNumber(std::string phoneNumber);
+    user* findUserByPhoneNumber(std::string phoneNumber);
 
-    bool userExistsByEmail(std::string email);
+    bool userExistsByPhoneNumber(const std::string phoneNumber);
 
-    bool userExistsByPhoneNumberPassword(std::string phoneNumber, std::string password);
+    bool userExistsByEmail(const std::string email);
 
-    bool userExistsByEmailPassword(std::string email, std::string password);
+    bool userExistsByPhoneNumberPassword(const std::string phoneNumber, const std::string password);
 
-    bool userExists(user u);
+    bool userExistsByEmailPassword(const std::string email, const std::string password);
+
+    bool userExists(const user u);
 
 };
 

@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,8 +13,14 @@
     <height>354</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>My Application Title</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -25,6 +34,12 @@
       <width>531</width>
       <height>101</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
     <property name="palette">
      <palette>
@@ -86,9 +101,9 @@
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>238</red>
-          <green>238</green>
-          <blue>236</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
@@ -232,9 +247,9 @@
        <colorrole role="Text">
         <brush brushstyle="SolidPattern">
          <color alpha="255">
-          <red>238</red>
-          <green>238</green>
-          <blue>236</blue>
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
          </color>
         </brush>
        </colorrole>
@@ -471,6 +486,9 @@
     <property name="cursor">
      <cursorShape>ArrowCursor</cursorShape>
     </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
     <property name="autoFillBackground">
      <bool>true</bool>
     </property>
@@ -518,6 +536,12 @@
        <width>141</width>
        <height>25</height>
       </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
      <property name="echoMode">
       <enum>QLineEdit::Password</enum>
@@ -1017,7 +1041,7 @@
       <string>Nome</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="txtCognome">
+    <widget class="QLineEdit" name="txtRCognome">
      <property name="geometry">
       <rect>
        <x>270</x>
@@ -1055,11 +1079,14 @@
        <height>30</height>
       </rect>
      </property>
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
      <property name="placeholderText">
       <string>Password</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="cmbDateDay">
+    <widget class="QComboBox" name="cmbRDateDay">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -1069,7 +1096,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="cmbDateMonth">
+    <widget class="QComboBox" name="cmbRDateMonth">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -1079,7 +1106,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="cmbDateYear">
+    <widget class="QComboBox" name="cmbRDateYear">
      <property name="geometry">
       <rect>
        <x>190</x>
@@ -1089,7 +1116,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QRadioButton" name="rdWoman">
+    <widget class="QRadioButton" name="rdRFemale">
      <property name="geometry">
       <rect>
        <x>290</x>
@@ -1102,7 +1129,7 @@
       <string>Donna</string>
      </property>
     </widget>
-    <widget class="QRadioButton" name="rdMan">
+    <widget class="QRadioButton" name="rdRMale">
      <property name="geometry">
       <rect>
        <x>400</x>
@@ -1193,16 +1220,6 @@
      <string>Iscriviti</string>
     </property>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>528</width>
-     <height>22</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>

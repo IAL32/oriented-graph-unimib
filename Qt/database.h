@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <fstream>
 
+class AdminNotFoundInFileException {};
+
 class UserAlreadyRegisteredException {};
 
 class CredentialsNotCorrectException {};
@@ -33,7 +35,11 @@ public:
 
     void addUser(user u);
 
-    user* findUserByPhoneNumber(std::string phoneNumber);
+    user findUserByPhoneNumber(std::string phoneNumber);
+
+    user findUserByEmail(std::string email);
+
+    user findUserByPhoneNumberOrEmail(std::string phoneNumberOrEmail);
 
     bool userExistsByPhoneNumber(const std::string phoneNumber);
 
@@ -44,6 +50,10 @@ public:
     bool userExistsByEmailPassword(const std::string email, const std::string password);
 
     bool userExists(const user u);
+
+    std::string toString(void) const;
+
+    void save(void);
 
 };
 

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <QDate>
+#include <regex>
 
 class StringFormatNotValidException {};
 
@@ -11,18 +12,26 @@ class PhoneNumberFormatNotValidException {};
 
 class EmailFormatNotValidException {};
 
+class DateFormatNotValidException {};
+
 class DateNotValidException {};
 
 class RoleFormatNotValidException {};
 
 class user {
 
-private:
-
+public:
     typedef enum {
         ADMIN = 0,
         USER = 1
     } Role;
+
+    typedef enum {
+        MALE = 0,
+        FEMALE = 1
+    } Gender;
+
+private:
 
     typedef enum {
         PHONENUMBER = 0,
@@ -38,21 +47,27 @@ private:
     std::string _phoneNumber;
     std::string _name;
     std::string _surname;
-    bool _gender;
+    Gender _gender;
     QDate _birthday;
     std::string _password;
     std::string _email;
     Role _role;
 
-    void init(std::string phoneNumber, std::string name, std::string surname, bool gender, QDate birthday, std::string password, std::string email, Role role);
+    void init(std::string phoneNumber, std::string name, std::string surname, Gender gender, QDate birthday, std::string password, std::string email, Role role);
 
 public:
 
     static std::string DEFAULT_DATE_FORMAT;
+    static std::string PHONENUMBER_PATTERN;
+    static std::string EMAIL_PATTERN;
 
     user();
 
-    explicit user(std::string phoneNumber, std::string name, std::string surname, bool gender, QDate birthday, std::string password, std::string email, Role role);
+    bool operator==(const user &other);
+
+    bool operator!=(const user &other);
+
+    explicit user(std::string phoneNumber, std::string name, std::string surname, Gender gender, QDate birthday, std::string password, std::string email, Role role);
 
     std::string getPhoneNumber(void) const;
     void setPhoneNumber(std::string phoneNumber);
@@ -63,9 +78,10 @@ public:
     std::string getSurname(void) const;
     void setSurname(std::string surname);
 
+    static Gender getGenderFromString(std::string gender);
     bool isMale(void) const;
     bool isFemale(void) const;
-    void setGender(bool gender);
+    void setGender(Gender gender);
 
     QDate getBirthday(void) const;
     void setBirthday(QDate birthday);
@@ -79,6 +95,8 @@ public:
 
     static bool isPhoneNumber(std::string phoneNumber);
     static bool isEmail(std::string email);
+    static bool isDateValid(std::string date);
+    static bool isDateValid(QDate date);
 
     Role getRole(void) const;
     void setRole(Role role);

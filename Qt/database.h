@@ -3,7 +3,8 @@
 
 #include "user.h"
 #include <iostream>
-#include <vector>
+#include <list>
+#include <algorithm>
 
 class UsernameAlreadyRegisteredException {};
 
@@ -16,8 +17,10 @@ class UserNotFoundException {};
 class database {
 
 private:
-    std::vector<user> users;
+    std::list<user> _users;
+    std::string _sourceFilename;
 
+    void init(std::string );
 
 public:
 
@@ -27,15 +30,27 @@ public:
 
     database(const database &other);
 
-    database& operator=(const database &other);
+    explicit database(std::list<user> users);
 
-    explicit database(unsigned int capacity);
-
-    void swap(database &other);
+    explicit database(std::string sourceFilename);
 
     unsigned int getCount(void) const;
 
-    const user &operator[](unsigned int index) const;
+    std::list<user> getUsers(void) const;
+
+    user getUser(unsigned int index);
+
+    void addUser(user u);
+
+    bool userExistsByPhoneNumber(std::string phoneNumber);
+
+    bool userExistsByEmail(std::string email);
+
+    bool userExistsByPhoneNumberPassword(std::string phoneNumber, std::string password);
+
+    bool userExistsByEmailPassword(std::string email, std::string password);
+
+    bool userExists(user u);
 
 };
 

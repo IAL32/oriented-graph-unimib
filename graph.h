@@ -4,31 +4,86 @@
 #include <iostream>
 #include <exception>
 
+/**
+ * @brief The node has not been found
+ * 
+ */
 class EdgeNotFoundException: public std::exception {
     virtual const char* what() const throw() {
         return "Edge was not found";
     }
 };
 
-class DuplicateException {};
-
-class IndexOutOfBoundsException {};
-
-class NodeValueNotValidException {};
+/**
+ * @brief Attempt to insert a duplicate node
+ * 
+ */
+class DuplicateException: public std::exception {
+    virtual const char* what() const throw() {
+        return "Attempt to insert a duplicate node";
+    }
+};
 
 /**
- * @brief Template per il tipo dei label
+ * @brief Attempt to get an index from the matrix out of bounds
  * 
- * @tparam T=int 
+ */
+class IndexOutOfBoundsException: public std::exception {
+    virtual const char* what() const throw() {
+        return "Attempt to get an index from the matrix out of bounds";
+    }
+};
+
+/**
+ * @brief Matrix values can only be either 0 or 1
+ * 
+ */
+class NodeValueNotValidException: public std::exception {
+    virtual const char* what() const throw() {
+        return "Matrix values can only be either 0 or 1";
+    }
+};
+
+/**
+ * @brief A node was not found
+ * 
+ */
+class NodeNotFoundException: public std::exception {
+    virtual const char* what() const throw() {
+        return "The node was not found";
+    }
+};
+
+/**
+ * @brief Graph
+ * 
+ * @tparam T Type for node indentifiers
+ * @tparam E Functor for node comparison
  */
 template <typename T, typename E>
-
 class graph {
 
 private:
+
+    /**
+     * @brief The total number of nodes in the matrix
+     * 
+     */
     int _size;
+    /**
+     * @brief Matrix used for storing arch values
+     * 
+     */
     int** _adj_matrix;
+    /**
+     * @brief The node identifiers
+     * 
+     */
     T* _labels;
+    /**
+     * @brief Functor for comparing two nodes
+     * 
+     */
     E _isEqual;
 
     /**
@@ -49,7 +104,7 @@ private:
     }
 
     /**
-     * @brief 
+     * @brief Deletes the current graph instance
      * 
      */
     void _del() {
@@ -63,21 +118,21 @@ private:
     }
 
     /**
-     * @brief 
+     * @brief Checks if *value* is either 0 or 1
      * 
-     * @param value 
-     * @return true 
-     * @return false 
+     * @param value Value to check
+     * @return true The value is either 0 or 1
+     * @return false Value is not either 0 or 1
      */
     bool _is_node_value_valid(int value) {
         return (value == 0 || value == 1);
     }
 
     /**
-     * @brief 
+     * @brief Returns the given identifier position. Internal use.
      * 
-     * @param label 
-     * @return int 
+     * @param label The identifier to check
+     * @return int -1 when the label is not present in the list of identifiers. The position when it is present.
      */
     int _node_exists(const T label) {
         for (int i = 0; i < _size; i++)
@@ -86,17 +141,33 @@ private:
         return -1;
     }
 
+    /**
+     * @brief Checks if an arch axists two nodes given their instances
+     * 
+     * @param labelFrom The starting node
+     * @param labelTo The ending node
+     * @return true The arch exists
+     * @return false The arch does not exists
+     */
     bool _arch_exists(const T labelFrom, const T labelTo) const {
         return (_node_exists(labelFrom) && _node_exists(labelTo));
     }
 
+    /**
+     * @brief Checks if an arch axists two nodes given their position
+     * 
+     * @param labelFrom The starting node position
+     * @param labelTo The ending node position
+     * @return true The arch exists
+     * @return false The arch does not exists
+     */
     bool _arch_exists(const int indexFrom, const int indexTo) const {
         return (indexFrom >= 0 && indexFrom < _size && indexTo >= 0 && indexTo < _size);
     }
 
 public:
     /**
-     * @brief Construct a new graph object
+     * @brief Construct a new graph object with no elements.
      * 
      */
     graph() : _size(0), _adj_matrix(0), _labels(0) {
@@ -108,7 +179,8 @@ public:
     /**
      * @brief Construct a new graph object
      * 
-     * @param size
+     * @param size The size of the matrix
+     * @param T* labels A default list of elements.
      */
     explicit graph(int size, T* labels) : _size(0), _adj_matrix(0), _labels(0) {
         #ifndef NDEBUG
@@ -117,6 +189,12 @@ public:
         init(size, labels);
     }
 
+    /**
+     * @brief Copy operator
+     * 
+     * @param other The graph instance to copy from
+     * @return graph& A pointer to the graph instance
+     */
     graph& operator=(const graph &other) {
         if (&other != this) {
             graph tmp(other);
@@ -128,7 +206,7 @@ public:
     }
 
     /**
-     * @brief 
+     * @brief Operator for getting 
      * 
      * @param index 
      * @return int*& 
@@ -175,10 +253,9 @@ public:
     }
 
     /**
-     * @brief Dimensione del grafo
+     * @brief Graph size.
      * 
-     * Ritorna la dimensione del grafo
-     * @return La dimensione del grafo
+     * @return Graph size.
     **/
     int size(void) const {
         return _size;
@@ -186,9 +263,8 @@ public:
 
     /**
      * @brief Number of archs in the graph
-     * 
-     * Returns the number of archs inside the graph
-     * @return int 
+     *
+     * @return int The number of archs inside the graph
      */
     int archs(void) const {
         int count = 0;
@@ -218,7 +294,6 @@ public:
      * @brief Creates a new graph with the new node
      * 
      * @param label The node unique label
-     * @return graph<T, E> 
      */
     void add_node(T label) {
         if (exists(label)) {
@@ -262,12 +337,11 @@ public:
      * @brief Removes a node from the grap
      * 
      * @param label The node to remove from the graph
-     * @return graph<T, E> The new graph without the node
      */
     void remove_node(T label) {
         int node_index = _node_exists(label);
         if (node_index == -1) {
-            throw;
+            throw NodeNotFoundException();
         }
 
         int i, j;
@@ -283,21 +357,21 @@ public:
         }
 
         /**
-         *   a b c d e f
-         * a 0 1 0 1 0 0
-         * b 0 0 0 1 0 1
-         * c 0 1 0 0 0 0
-         * d 1 0 0 1 1 0
-         * e 0 0 1 0 0 0
-         * f 1 0 0 0 0 1
+         * / a b c d e f\n
+         * a 0 1 0 1 0 0\n
+         * b 0 0 0 1 0 1\n
+         * c 0 1 0 0 0 0\n
+         * d 1 0 0 1 1 0\n
+         * e 0 0 1 0 0 0\n
+         * f 1 0 0 0 0 1\n
          * 
          * We want to remove node c, thus:
-         *   a b | d e f
-         * a 0 1 | 1 0 0 ] -> First, we focus on the a,b matrix
-         * b 0 0 | 1 0 1 ] -> Second, we fill the right part
-         * -------------
-         * d 1 0 | 1 1 0 ] -> third, we focus on a,b and d,e,f
-         * e 0 0 | 0 0 0 ] -> lastly, we fill everything else left
+         *   a b | d e f\n
+         * a 0 1 | 1 0 0 ] -> First, we focus on the a,b matrix\n
+         * b 0 0 | 1 0 1 ] -> Second, we fill the right part\n
+         * \-\-\-\-\-\-\-\-\-\-\-\-\-\n
+         * d 1 0 | 1 1 0 ] -> third, we focus on a,b and d,e,f\n
+         * e 0 0 | 0 0 0 ] -> lastly, we fill everything else left\n
          * f 1 0 | 0 0 1 ]
          */
 
@@ -341,9 +415,9 @@ public:
     /**
      * @brief Set the Arch object
      * 
-     * @param labelFrom 
-     * @param labelTo 
-     * @param value 
+     * @param labelFrom The node the archs starts from
+     * @param labelTo The node the archs ends to
+     * @param value 1 if there is no arch between **labelFrom** and **labelTo**, 0 otherwise
      */
     void setArch(T labelFrom, T labelTo, int value) {
         int index_from = _node_exists(labelFrom);
@@ -353,11 +427,11 @@ public:
     }
 
     /**
-     * @brief Set the Cell object
+     * @brief Sets a matrix cell to a certain value, 0 or 1.
      * 
-     * @param indexFrom 
-     * @param indexTo 
-     * @param value 
+     * @param indexFrom Row position in the matrix
+     * @param indexTo Column position in the matrix
+     * @param value Value to insert, either 0 or 1
      */
     void setCell(int indexFrom, int indexTo, int value) {
         if (!(indexFrom < _size && indexTo < _size))
@@ -367,12 +441,26 @@ public:
         _adj_matrix[indexFrom][indexTo] = value;
     }
 
+    /**
+     * @brief Gets the cell value from the matrix given its position. Either 0 or 1.
+     * 
+     * @param i Row position
+     * @param j Column position
+     * @return int The value held at i, j
+     */
     int getArch(int i, int j) {
         if (i < 0 || i > _size - 1 || j < 0 || j > _size - 1)
             throw EdgeNotFoundException();
         return _adj_matrix[i][j];
     }
 
+    /**
+     * @brief Gets the cell value from the matrix given its starting node **labelFrom** and ending node **labelTo**. Either 0 or 1.
+     * 
+     * @param labelFrom The start node
+     * @param labelTo The ending node
+     * @return int The value held from the arch **labelFrom** and **labelTo**
+     */
     int getArch(T labelFrom, T labelTo) {
         int indexFrom, indexTo;
         indexFrom = _node_exists(labelFrom);
@@ -380,6 +468,10 @@ public:
         return getArch(indexFrom, indexTo);
     }
 
+    /**
+     * @brief Prints the matrix
+     * 
+     */
     void print() {
         for (int i = 0; i < _size; i++) {
             for (int j = 0; j < _size; j++) 
@@ -388,12 +480,20 @@ public:
         }
     }
 
+    /**
+     * @brief Prints the labels
+     * 
+     */
     void print_labels() {
         for(int i = 0; i < _size; i++)
             std::cout << _labels[i] << " ";
         std::cout << std::endl;
     }
 
+    /**
+     * @brief Iterator used to iterate over the node elments of the matrix
+     * 
+     */
 	class const_iterator {	
 	public:
 		typedef std::forward_iterator_tag iterator_category;
@@ -416,7 +516,7 @@ public:
 		const_iterator(const const_iterator &other) : ptr(other.ptr), position(other.position) {}
 
         /**
-         * @brief 
+         * @brief Equals operator
          * 
          * @param other 
          * @return const_iterator& 
@@ -437,7 +537,7 @@ public:
 		}
 
 		/**
-		 * @brief 
+		 * @brief Pointer operator
 		 * 
 		 * @return reference 
 		 */
@@ -446,7 +546,7 @@ public:
 		}
 
 		/**
-		 * @brief 
+		 * @brief Arrow operator
 		 * 
 		 * @return pointer 
 		 */
@@ -455,7 +555,7 @@ public:
 		}
 		
 		/**
-		 * @brief 
+		 * @brief Increment operator
 		 * 
 		 * @return const_iterator 
 		 */
@@ -466,7 +566,7 @@ public:
 		}
 
 		/**
-		 * @brief 
+		 * @brief Increment operator
 		 * 
 		 * @return const_iterator& 
 		 */
@@ -476,11 +576,11 @@ public:
 		}
 
 		/**
-		 * @brief 
+		 * @brief Equals operator
 		 * 
-		 * @param other 
-		 * @return true 
-		 * @return false 
+		 * @param other Other iterator to compare with
+		 * @return true The iterators point to the same element
+		 * @return false The iterators do not point to the same element
 		 */
 		bool operator==(const const_iterator &other) const {
 			return (ptr == other.ptr) && (position == other.position);
@@ -499,9 +599,21 @@ public:
 
 
 	private:
+        /**
+         * @brief A pointer to the graph object
+         * 
+         */
 		const graph *ptr;
+        /**
+         * @brief The current iterator position within the graph object
+         * 
+         */
 		int position;
 
+        /**
+         * @brief Friends class with graph
+         * 
+         */
 		friend class graph; 
 
 		/**
@@ -515,18 +627,18 @@ public:
 	};
 
 	/**
-	 * @brief 
+	 * @brief Returns an iterator pointing at the start of the node list
 	 * 
-	 * @return const_iterator 
+	 * @return const_iterator Pointer to the start of the list
 	 */
 	const_iterator begin() const {
 		return const_iterator(this, 0);
 	}
 	
 	/**
-	 * @brief 
+	 * @brief Returns an iterator pointing at the end of the node list
 	 * 
-	 * @return const_iterator 
+	 * @return const_iterator Pointer to the end of the list
 	 */
 	const_iterator end() const {
 		return const_iterator(this, _size);

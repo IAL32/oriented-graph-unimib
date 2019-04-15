@@ -20,7 +20,6 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::setup() {
-    QString formStyleSheet = "QLineEdit { border-radius: 5px; border: 1px solid lightgray; }";
     // set styles
     QStringList cmbRDateDays;
     QStringList cmbRDateMonths;

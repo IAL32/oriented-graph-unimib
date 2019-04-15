@@ -1,28 +1,28 @@
 #include "user.h"
 
-std::string user::DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
-std::string user::PHONENUMBER_PATTERN = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$";
-std::string user::EMAIL_PATTERN = "^[0-9a-zA-Z_\\-\\.]+@[0-9a-zA-Z_\\-\\.]+\\.[0-9a-zA-Z]+$";
+QString user::DEFAULT_DATE_FORMAT = "dd/MM/yyyy";
+QString user::PHONENUMBER_PATTERN = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$";
+QString user::EMAIL_PATTERN = "^[0-9a-zA-Z_\\-\\.]+@[0-9a-zA-Z_\\-\\.]+\\.[0-9a-zA-Z]+$";
 
-void user::init(std::string phoneNumber, std::string name, std::string surname, Gender gender, QDate birthday, std::string password, std::string email, Role role) {
-    _phoneNumber = phoneNumber;
+void user::init(QString phoneNumber, QString name, QString surname, Gender gender, QDate birthday, QString password, QString email, Role role) {
+    setPhoneNumber(phoneNumber);
     _name = name;
     _surname = surname;
     _gender = gender;
-    _birthday = birthday;
+    setBirthday(birthday);
     _password = password;
-    _email = email;
+    setEmail(email);
     _role = role;
 }
 
 user::user(void) {}
 
-user::user(std::string phoneNumber, std::string name, std::string surname, Gender gender, QDate birthday, std::string password, std::string email, Role role) {
+user::user(QString phoneNumber, QString name, QString surname, Gender gender, QDate birthday, QString password, QString email, Role role) {
     init(phoneNumber, name, surname, gender, birthday, password, email, role);
 }
 
 bool user::operator==(const user &other) {
-    if (!_email.empty() && !_phoneNumber.empty() && !other.getEmail().empty() && !other.getPhoneNumber().empty())
+    if (!_email.isEmpty() && !_phoneNumber.isEmpty() && !other.getEmail().isEmpty() && !other.getPhoneNumber().isEmpty())
         return _email == other.getEmail() || _phoneNumber == other.getPhoneNumber();
     return false;
 }
@@ -31,46 +31,62 @@ bool user::operator!=(const user &other) {
     return !(*this == other);
 }
 
-std::string user::getPhoneNumber() const { return _phoneNumber; }
-void user::setPhoneNumber(std::string phoneNumber) { _phoneNumber = phoneNumber; }
+QString user::getPhoneNumber() const { return _phoneNumber; }
+void user::setPhoneNumber(QString phoneNumber) {
+    if (!phoneNumber.isEmpty() && !isPhoneNumber(phoneNumber))
+        throw PhoneNumberFormatNotValidException();
+    _phoneNumber = phoneNumber;
+}
 
-std::string user::getName() const { return _name; }
-void user::setName(std::string name) { _name = name; }
+QString user::getName() const { return _name; }
+void user::setName(QString name) { _name = name; }
 
-std::string user::getSurname() const { return _surname; }
-void user::setSurname(std::string surname) { _surname = surname; }
+QString user::getSurname() const { return _surname; }
+void user::setSurname(QString surname) { _surname = surname; }
 
+user::Gender user::getGender() {
+    return _gender;
+}
+QString user::getGenderString() {
+    return (isMale()) ? "m" : "f";
+}
+user::Gender user::getGenderFromString(QString gender) {
+    return (gender == "m") ? user::Gender::MALE : user::Gender::FEMALE;
+}
 bool user::isMale() const { return _gender == Gender::MALE; }
 bool user::isFemale() const { return _gender == Gender::FEMALE; }
 void user::setGender(Gender gender) { _gender = gender; }
 
 QDate user::getBirthday() const { return _birthday; }
 void user::setBirthday(QDate birthday) {
+    if (!birthday.isValid())
+        throw DateNotValidException();
     _birthday = birthday;
 }
 
-void user::setBirthdayFromString(std::string birthday) {
-    QString qbirthday = QString::fromStdString(birthday);
-    QDate d = QDate::fromString(qbirthday, "dd/MM/yyyy");
+void user::setBirthdayFromString(QString birthday) {
+    QDate d = QDate::fromString(birthday, DEFAULT_DATE_FORMAT);
     setBirthday(d);
 }
 
-std::string user::getPassword(void) const {return _password; }
-void user::setPassword(std::string password) { _password = password; }
+QString user::getPassword(void) const {return _password; }
+void user::setPassword(QString password) { _password = password; }
 
-std::string user::getEmail(void) const { return _email; }
-void user::setEmail(std::string email) { _email = email; }
+QString user::getEmail(void) const { return _email; }
+void user::setEmail(QString email) {
+    if (!email.isEmpty() && !isEmail(email))
+        throw EmailFormatNotValidException();
+    _email = email;
+}
 
-bool user::isPhoneNumber(std::string phoneNumber) {
-    return std::regex_match(phoneNumber, std::regex(PHONENUMBER_PATTERN));
+bool user::isPhoneNumber(QString phoneNumber) {
+    return std::regex_match(phoneNumber.toStdString(), std::regex(PHONENUMBER_PATTERN.toStdString()));
 }
-bool user::isEmail(std::string email) {
-    return std::regex_match(email, std::regex(EMAIL_PATTERN));
+bool user::isEmail(QString email) {
+    return std::regex_match(email.toStdString(), std::regex(EMAIL_PATTERN.toStdString()));
 }
-bool user::isDateValid(std::string date) {
-    QString qDateString = QString::fromStdString(date);
-    QString qDEFAULT_DATE_FORMAT = QString::fromStdString(DEFAULT_DATE_FORMAT);
-    QDate qDate = QDate::fromString(qDateString, qDEFAULT_DATE_FORMAT);
+bool user::isDateValid(QString date) {
+    QDate qDate = QDate::fromString(date, DEFAULT_DATE_FORMAT);
     return isDateValid(qDate);
 }
 bool user::isDateValid(QDate date) {
@@ -78,14 +94,17 @@ bool user::isDateValid(QDate date) {
 }
 
 user::Role user::getRole() const { return _role; }
+QString user::getRoleString() const {
+    return (_role == Role::ADMIN) ? "Administrator" : "User";
+};
 void user::setRole(Role role) { _role = role; }
 bool user::isAdmin() const { return _role == user::Role::ADMIN; }
 bool user::isUser() const { return _role == user::Role::USER; }
 
-user user::fromString(std::string csvUser) {
-    std::istringstream input(csvUser);
+user user::fromString(QString csvUser) {
+    std::istringstream input(csvUser.toStdString());
     int i = 0;
-    std::string
+    QString
             phoneNumber,
             name,
             surname,
@@ -94,33 +113,32 @@ user user::fromString(std::string csvUser) {
     Gender gender = Gender::MALE;
     QDate birthday;
     Role role = Role::USER;
+    QString qValue;
     for (std::string value; getline(input, value, ','); i++) {
+        qValue = QString::fromStdString(value);
         switch (i) {
         case Attr::PHONENUMBER: {
-            if (!value.empty() && !user::isPhoneNumber(value))
+            if (!value.empty() && !user::isPhoneNumber(qValue))
                 throw PhoneNumberFormatNotValidException();
-            phoneNumber = value;
+            phoneNumber = qValue;
             break;
         }
         case Attr::NAME: {
-            name = value;
+            name = qValue;
             break;
         }
         case Attr::SURNAME: {
-            surname = value;
+            surname = qValue;
             break;
         }
         case Attr::GENDER: {
-            gender = (value == "f") ? Gender::FEMALE : Gender::MALE ;
+            gender = user::getGenderFromString(qValue);
             break;
         }
         case Attr::BIRTHDAY: {
             if (value.empty())
                 throw DateFormatNotValidException();
-
-            QString qbirthday = QString::fromStdString(value);
-            QString qDEFAULT_DATE_FORMAT = QString::fromStdString(DEFAULT_DATE_FORMAT);
-            QDate qDateBirthday = QDate::fromString(qbirthday, qDEFAULT_DATE_FORMAT);
+            QDate qDateBirthday = QDate::fromString(qValue, DEFAULT_DATE_FORMAT);
 
             if (!qDateBirthday.isValid())
                 throw DateNotValidException();
@@ -129,13 +147,13 @@ user user::fromString(std::string csvUser) {
             break;
         }
         case Attr::PASSWORD: {
-            password = value;
+            password = qValue;
             break;
         }
         case Attr::EMAIL: {
-            if (!value.empty() && !user::isEmail(value))
+            if (!value.empty() && !user::isEmail(qValue))
                 throw EmailFormatNotValidException();
-            email = value;
+            email = qValue;
             break;
         }
         case Attr::ROLE: {
@@ -155,18 +173,17 @@ user user::fromString(std::string csvUser) {
 
     return user(phoneNumber, name, surname, gender, birthday, password, email, role);
 }
-std::string user::toString() const {
-    QString qDEFAULT_DATE_FORMAT = QString::fromStdString(DEFAULT_DATE_FORMAT);
+QString user::toString() const {
     return _phoneNumber + ","
             + _name + ","
             + _surname + ","
             + (isMale() ? "m" : "f") + ","
-            + _birthday.toString(qDEFAULT_DATE_FORMAT).toUtf8().constData() + ","
+            + _birthday.toString(DEFAULT_DATE_FORMAT).toUtf8() + ","
             + _password + ","
             + _email + ","
             + ((isAdmin()) ? "0" : "1");
 }
 
 std::ostream& operator<<(std::ostream &os, const user &a) {
-    return os << a.toString();
+    return os << a.toString().toStdString();
 }

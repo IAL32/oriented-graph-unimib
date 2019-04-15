@@ -31,8 +31,6 @@ public:
         FEMALE = 1
     } Gender;
 
-private:
-
     typedef enum {
         PHONENUMBER = 0,
         NAME = 1,
@@ -41,25 +39,28 @@ private:
         BIRTHDAY = 4,
         PASSWORD = 5,
         EMAIL = 6,
-        ROLE = 7
+        ROLE = 7,
+        COUNT = 8
     } Attr;
 
-    std::string _phoneNumber;
-    std::string _name;
-    std::string _surname;
+private:
+
+    QString _phoneNumber;
+    QString _name;
+    QString _surname;
     Gender _gender;
     QDate _birthday;
-    std::string _password;
-    std::string _email;
+    QString _password;
+    QString _email;
     Role _role;
 
-    void init(std::string phoneNumber, std::string name, std::string surname, Gender gender, QDate birthday, std::string password, std::string email, Role role);
+    void init(QString phoneNumber, QString name, QString surname, Gender gender, QDate birthday, QString password, QString email, Role role);
 
 public:
 
-    static std::string DEFAULT_DATE_FORMAT;
-    static std::string PHONENUMBER_PATTERN;
-    static std::string EMAIL_PATTERN;
+    static QString DEFAULT_DATE_FORMAT;
+    static QString PHONENUMBER_PATTERN;
+    static QString EMAIL_PATTERN;
 
     user();
 
@@ -67,44 +68,47 @@ public:
 
     bool operator!=(const user &other);
 
-    explicit user(std::string phoneNumber, std::string name, std::string surname, Gender gender, QDate birthday, std::string password, std::string email, Role role);
+    explicit user(QString phoneNumber, QString name, QString surname, Gender gender, QDate birthday, QString password, QString email, Role role);
 
-    std::string getPhoneNumber(void) const;
-    void setPhoneNumber(std::string phoneNumber);
+    QString getPhoneNumber(void) const;
+    void setPhoneNumber(QString phoneNumber);
 
-    std::string getName(void) const;
-    void setName(std::string name);
+    QString getName(void) const;
+    void setName(QString name);
 
-    std::string getSurname(void) const;
-    void setSurname(std::string surname);
+    QString getSurname(void) const;
+    void setSurname(QString surname);
 
-    static Gender getGenderFromString(std::string gender);
+    Gender getGender();
+    QString getGenderString();
+    static Gender getGenderFromString(QString gender);
     bool isMale(void) const;
     bool isFemale(void) const;
     void setGender(Gender gender);
 
     QDate getBirthday(void) const;
     void setBirthday(QDate birthday);
-    void setBirthdayFromString(std::string birthday);
+    void setBirthdayFromString(QString birthday);
 
-    std::string getPassword(void) const;
-    void setPassword(std::string password);
+    QString getPassword(void) const;
+    void setPassword(QString password);
 
-    std::string getEmail(void) const;
-    void setEmail(std::string email);
+    QString getEmail(void) const;
+    void setEmail(QString email);
 
-    static bool isPhoneNumber(std::string phoneNumber);
-    static bool isEmail(std::string email);
-    static bool isDateValid(std::string date);
+    static bool isPhoneNumber(QString phoneNumber);
+    static bool isEmail(QString email);
+    static bool isDateValid(QString date);
     static bool isDateValid(QDate date);
 
     Role getRole(void) const;
+    QString getRoleString(void) const;
     void setRole(Role role);
     bool isAdmin(void) const;
     bool isUser(void) const;
 
-    static user fromString(std::string csvUser);
-    std::string toString(void) const;
+    static user fromString(QString csvUser);
+    QString toString(void) const;
 };
 
 #endif // USER_H

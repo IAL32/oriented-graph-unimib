@@ -19,9 +19,9 @@ class database {
 
 private:
     std::list<user> _users;
-    std::string _sourceFilename;
+    QString _sourceFilename;
 
-    void init(std::string sourceFilename);
+    void init(QString sourceFilename);
 
 public:
 
@@ -29,31 +29,33 @@ public:
 
     database(const database &other);
 
-    explicit database(std::string sourceFilename);
+    explicit database(QString sourceFilename);
 
     std::list<user> getUsers(void);
 
     void addUser(user u);
 
-    user findUserByPhoneNumber(std::string phoneNumber);
+    user findUserByPhoneNumber(QString phoneNumber);
 
-    user findUserByEmail(std::string email);
+    user findUserByEmail(QString email);
 
-    user findUserByPhoneNumberOrEmail(std::string phoneNumberOrEmail);
+    user findUserByPhoneNumberOrEmail(QString phoneNumberOrEmail);
 
-    bool userExistsByPhoneNumber(const std::string phoneNumber);
+    bool userExistsByPhoneNumber(const QString phoneNumber);
 
-    bool userExistsByEmail(const std::string email);
+    bool userExistsByEmail(const QString email);
 
-    bool userExistsByPhoneNumberPassword(const std::string phoneNumber, const std::string password);
+    bool userExistsByPhoneNumberPassword(const QString phoneNumber, const QString password);
 
-    bool userExistsByEmailPassword(const std::string email, const std::string password);
+    bool userExistsByEmailPassword(const QString email, const QString password);
 
     bool userExists(const user u);
 
-    std::string toString(void) const;
+    QString toString(void) const;
 
     void save(void);
+
+    user login(QString phoneOrEmail, QString password);
 
 };
 

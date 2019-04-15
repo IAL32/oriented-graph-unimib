@@ -28,15 +28,18 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     user.cpp \
-    database.cpp
+    database.cpp \
+    admindialog.cpp
 
 HEADERS += \
         mainwindow.h \
     database.h \
-    user.h
+    user.h \
+    admindialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    admindialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

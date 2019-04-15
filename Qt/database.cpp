@@ -1,7 +1,7 @@
 #include <database.h>
 
-void database::init(std::string sourceFilename) {
-    std::ifstream input(sourceFilename);
+void database::init(QString sourceFilename) {
+    std::ifstream input(sourceFilename.toStdString());
     _sourceFilename = sourceFilename;
 
     if (!input.good() || input.peek() == std::ifstream::traits_type::eof()) {
@@ -9,8 +9,10 @@ void database::init(std::string sourceFilename) {
         save();
     }
 
+    QString qLine;
     for (std::string line; getline(input, line);) {
-        _users.push_back(user::fromString(line));
+        qLine = QString::fromStdString(line);
+        _users.push_back(user::fromString(qLine));
     }
 
     if (!userExistsByEmail("admin@pas.com"))
@@ -21,7 +23,7 @@ void database::init(std::string sourceFilename) {
 
 database::database(void) : _users(0),  _sourceFilename("") {  }
 
-database::database(std::string sourceFilename) {
+database::database(QString sourceFilename) {
     init(sourceFilename);
 }
 
@@ -36,7 +38,7 @@ void database::addUser(const user u) {
     save();
 }
 
-user database::findUserByPhoneNumber(std::string phoneNumber) {
+user database::findUserByPhoneNumber(QString phoneNumber) {
     if (!user::isPhoneNumber(phoneNumber))
         throw PhoneNumberFormatNotValidException();
     std::list<user>::iterator i, ie;
@@ -46,7 +48,7 @@ user database::findUserByPhoneNumber(std::string phoneNumber) {
     throw UserNotFoundException();
 }
 
-user database::findUserByEmail(std::string email) {
+user database::findUserByEmail(QString email) {
     if (!user::isEmail(email))
         throw EmailFormatNotValidException();
     std::list<user>::iterator i, ie;
@@ -56,7 +58,7 @@ user database::findUserByEmail(std::string email) {
     throw UserNotFoundException();
 }
 
-user database::findUserByPhoneNumberOrEmail(std::string phoneNumberOrEmail) {
+user database::findUserByPhoneNumberOrEmail(QString phoneNumberOrEmail) {
     if (user::isEmail(phoneNumberOrEmail))
         return findUserByEmail(phoneNumberOrEmail);
     else if (user::isPhoneNumber(phoneNumberOrEmail))
@@ -64,7 +66,7 @@ user database::findUserByPhoneNumberOrEmail(std::string phoneNumberOrEmail) {
     else throw UserNotFoundException();
 }
 
-bool database::userExistsByPhoneNumber(const std::string phoneNumber) {
+bool database::userExistsByPhoneNumber(const QString phoneNumber) {
     if (!user::isPhoneNumber(phoneNumber))
         throw PhoneNumberFormatNotValidException();
     std::list<user>::const_iterator i, ie;
@@ -75,7 +77,7 @@ bool database::userExistsByPhoneNumber(const std::string phoneNumber) {
     return false;
 }
 
-bool database::userExistsByEmail(const std::string email) {
+bool database::userExistsByEmail(const QString email) {
     if (!user::isEmail(email))
         throw EmailFormatNotValidException();
     std::list<user>::const_iterator i, ie;
@@ -89,17 +91,17 @@ bool database::userExistsByEmail(const std::string email) {
 bool database::userExists(const user u) {
     std::list<user>::const_iterator i, ie;
     for (i = _users.begin(), ie = _users.end(); i != ie; ++i) {
-        if (!u.getPhoneNumber().empty() && i->getPhoneNumber().empty() && u.getPhoneNumber() == i->getPhoneNumber())
+        if (!u.getPhoneNumber().isEmpty() && !i->getPhoneNumber().isEmpty() && u.getPhoneNumber() == i->getPhoneNumber())
             return true;
-        if (!u.getEmail().empty() && i->getEmail().empty() && u.getEmail() == i->getEmail())
+        if (!u.getEmail().isEmpty() && !i->getEmail().isEmpty() && u.getEmail() == i->getEmail())
             return true;
     }
     return false;
 }
 
-std::string database::toString() const {
+QString database::toString() const {
     std::list<user>::const_iterator i, ie;
-    std::string acc = "";
+    QString acc = "";
 
     for (i = _users.begin(), ie = _users.end(); i != ie; ++i)
         acc += i->toString() + '\n';
@@ -108,7 +110,7 @@ std::string database::toString() const {
 }
 
 void database::save() {
-    std::ofstream output(_sourceFilename);
+    std::ofstream output(_sourceFilename.toStdString());
 
     if (_users.size() == 0) {
         QDate today = QDate::currentDate();
@@ -117,6 +119,13 @@ void database::save() {
         _users.push_back(admin);
     }
 
-    output << toString();
+    output << toString().toStdString();
     output.close();
+}
+
+user database::login(QString phoneOrEmail, QString password) {
+    user u = findUserByPhoneNumberOrEmail(phoneOrEmail);
+    if (u.getPassword() != password)
+        throw CredentialsNotCorrectException();
+    return u;
 }

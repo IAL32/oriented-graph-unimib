@@ -5,6 +5,7 @@
 #include <QButtonGroup>
 #include "user.h"
 #include "database.h"
+#include "admindialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,12 +23,18 @@ private slots:
     void on_btnRegister_clicked();
     void on_btnLogin_clicked();
 
+    void on_label_linkActivated(const QString &link);
+
 private:
     Ui::MainWindow *ui;
     database db;
     QButtonGroup btnGroupGender;
+    AdminDialog *myAdminDialog;
 
-    void setup();
+    void setup(void);
+    void errorDialog(QString error);
+    void infoDialog(QString info);
+    void showAdminWindow(void);
 };
 
 #endif // MAINWINDOW_H

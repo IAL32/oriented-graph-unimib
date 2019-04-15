@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QMessageBox>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete myAdminDialog;
     delete ui;
 }
 
@@ -24,14 +26,7 @@ void MainWindow::setup() {
     QStringList cmbRDateMonths;
     QStringList cmbRDateYears;
 
-//    setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
-
-//    setFixedSize(width(), height());
-    ui->statusBar->setSizeGripEnabled(false);
-    ui->txtRNome->setStyleSheet(formStyleSheet);
-    ui->txtRCognome->setStyleSheet(formStyleSheet);
-    ui->txtREmailPhone->setStyleSheet(formStyleSheet);
-    ui->txtRPassword->setStyleSheet(formStyleSheet);
+    setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
 
     for (int i = 1; i <= 31; i++)
         cmbRDateDays << QString::number(i);
@@ -50,7 +45,7 @@ void MainWindow::setup() {
     btnGroupGender.setId(ui->rdRFemale, user::Gender::FEMALE);
     ui->rdRFemale->setChecked(true);
 
-    db = database(QDir::currentPath().toStdString() + "/data.csv");
+    db = database(QDir::currentPath() + "/data.csv");
 }
 
 void MainWindow::on_btnRegister_clicked()
@@ -73,64 +68,37 @@ void MainWindow::on_btnRegister_clicked()
     password = ui->txtRPassword->text();
 
     if (emailOrPhone.isEmpty()) {
-        QMessageBox::critical(
-                        this,
-                        tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                        tr("Email or phone cannot be empty!"));
+        errorDialog("Email or phone cannot be empty!");
         return;
     }
-    if (!user::isEmail(emailOrPhone.toStdString()) && !user::isPhoneNumber(emailOrPhone.toStdString())) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("Email or phone not in a valid format!"));
-        return;
-    }
-
-    if (day.isEmpty() || month.isEmpty() || year.isEmpty()) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("Day, month or year are not selected!"));
-        return;
-    }
-
-    if (!qBirthday.isValid()) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("The date you selected is not valid!"));
-        return;
-    }
-
-    if (user::isEmail(emailOrPhone.toStdString())) {
-        u.setEmail(emailOrPhone.toStdString());
-        u.setPhoneNumber("");
-    } else if (user::isPhoneNumber(emailOrPhone.toStdString())) {
-        u.setEmail("");
-        u.setPhoneNumber(emailOrPhone.toStdString());
-    }
-    u.setGender(gender);
-    u.setName(name.toStdString());
-    u.setSurname(surname.toStdString());
-    u.setBirthday(qBirthday);
-    u.setPassword(password.toStdString());
-    u.setRole(user::Role::USER);
 
     try {
-        db.addUser(u);
-    } catch(...) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("User with same email or phone number already exists!"));
-        return;
-    }
+        if (user::isEmail(emailOrPhone)) {
+            u.setEmail(emailOrPhone);
+            u.setPhoneNumber("");
+        } else if (user::isPhoneNumber(emailOrPhone)) {
+            u.setEmail("");
+            u.setPhoneNumber(emailOrPhone);
+        }
+        u.setGender(gender);
+        u.setName(name);
+        u.setSurname(surname);
+        u.setBirthday(qBirthday);
+        u.setPassword(password);
+        u.setRole(user::Role::USER);
 
-    QMessageBox::information(
-        this,
-        tr(ui->statusBar->windowTitle().toStdString().c_str()),
-        tr("Success! You are now registered!"));
+        db.addUser(u);
+        infoDialog("Success! You are now registered!");
+
+    } catch(UserAlreadyRegisteredException) {
+        errorDialog("User with same email or phone number already exists!");
+    } catch (EmailFormatNotValidException) {
+        errorDialog("Email or phone not in a valid format!");
+    } catch (PhoneNumberFormatNotValidException) {
+        errorDialog("Email or phone not in a valid format!");
+    } catch (DateNotValidException) {
+        errorDialog("The date you selected is not valid!");
+    }
 }
 
 void MainWindow::on_btnLogin_clicked()
@@ -141,44 +109,61 @@ void MainWindow::on_btnLogin_clicked()
     phoneOrEmail = ui->txtLEmailPhone->text();
     password = ui->txtLPassword->text();
 
-    if (!user::isPhoneNumber(phoneOrEmail.toStdString()) && !user::isEmail(phoneOrEmail.toStdString())) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("Email or phone not in a valid format!"));
+    if (phoneOrEmail.isEmpty()) {
+        errorDialog("Email or phone cannot be empty!");
         return;
     }
 
     try {
-        std::list<user>::iterator ie = db.getUsers().end();
-        u = db.findUserByPhoneNumberOrEmail(phoneOrEmail.toStdString());
-        if (u == *ie)
-            throw UserNotFoundException();
-
-        if (u.getPassword() != password.toStdString())
-            throw CredentialsNotCorrectException();
-
+        u = db.login(phoneOrEmail, password);
         if (u.getRole() == user::Role::ADMIN) {
-            QMessageBox::information(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("Admin"));
-        } else
-            QMessageBox::information(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("Wonderful! You logged in succesfully!"));
+            showAdminWindow();
+        } else {
+            infoDialog("Wonderful! You logged in succesfully!");
+        }
+    } catch(EmailFormatNotValidException) {
+        errorDialog("Email or number not in a valid format!");
+    } catch (PhoneNumberFormatNotValidException) {
+        errorDialog("Email or number not in a valid format!");
     } catch (UserNotFoundException) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("User was not found!"));
+        errorDialog("User was not found!");
         return;
     } catch (CredentialsNotCorrectException) {
-        QMessageBox::critical(
-                this,
-                tr(ui->statusBar->windowTitle().toStdString().c_str()),
-                tr("Login credentials are not correct!"));
+        errorDialog("Login credentials are not correct!");
         return;
     }
+}
+
+void MainWindow::on_label_linkActivated(const QString &link)
+{
+    QString input = link; // just so it doesn't give me the warning
+    input = QInputDialog::getText(
+                this,
+                "Password recovery",
+                "Insert yout email:");
+
+    if (input.isEmpty())
+        return;
+
+    try {
+        user u = db.findUserByEmail(input);
+        infoDialog("Email with password recovery steps has been sent!");
+    } catch(EmailFormatNotValidException) {
+        errorDialog("Email not in a valid format!");
+    } catch(UserNotFoundException) {
+        errorDialog("User with that email has not been found!");
+    }
+}
+
+void MainWindow::errorDialog(QString error) {
+    QMessageBox::critical(this, ui->statusBar->windowTitle(), error);
+}
+
+void MainWindow::infoDialog(QString info) {
+    QMessageBox::information(this, ui->statusBar->windowTitle(), info);
+}
+
+void MainWindow::showAdminWindow() {
+    myAdminDialog = new AdminDialog(&db, this);
+    myAdminDialog->exec();
 }

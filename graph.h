@@ -304,17 +304,27 @@ public:
         }
 
         int i, j;
-        T* labels = new T[_size + 1];
-        int** adj_matrix = new int*[_size + 1];
+        T* labels;
+        int** adj_matrix;
+        try {
+            labels = new T[_size + 1];
+            adj_matrix = new int*[_size + 1];
 
-        for (i = 0; i < _size; i++) {
-            labels[i] = _labels[i];
-            adj_matrix[i] = new int[_size + 1];
-            for (j = 0; j < _size; j++)
-                adj_matrix[i][j] = _adj_matrix[i][j];
+            for (i = 0; i < _size; i++) {
+                labels[i] = _labels[i];
+                adj_matrix[i] = new int[_size + 1];
+                for (j = 0; j < _size; j++)
+                    adj_matrix[i][j] = _adj_matrix[i][j];
+            }
+            labels[_size] = label;
+            adj_matrix[_size] = new int[_size + 1];
+        } catch (...) {
+            #ifndef NDEBUG
+            std::cout << "~ Error while trying to allocate memory" << std::endl;
+            #endif
+            _del();
+            throw std::bad_alloc();
         }
-        labels[_size] = label;
-        adj_matrix[_size] = new int[_size + 1];
         for (i = 0; i < _size + 1; i++)
             adj_matrix[i][_size] = 0;
         for (j = 0; j < _size + 1; j++)
@@ -345,15 +355,25 @@ public:
         }
 
         int i, j;
-        T* labels = new T[_size - 1];
-        int** adj_matrix = new int*[_size - 1];
-        for (i = 0; i < node_index; i++) {
-            labels[i] = _labels[i];
-            adj_matrix[i] = new int[_size -1];
-        }
-        for (i = node_index + 1; i < _size; i++) {
-                labels[i - 1] = _labels[i];
-                adj_matrix[i - 1] = new int[_size -1];
+        T* labels;
+        int** adj_matrix;
+        try {
+            labels = new T[_size - 1];
+            adj_matrix = new int*[_size - 1];
+            for (i = 0; i < node_index; i++) {
+                labels[i] = _labels[i];
+                adj_matrix[i] = new int[_size -1];
+            }
+            for (i = node_index + 1; i < _size; i++) {
+                    labels[i - 1] = _labels[i];
+                    adj_matrix[i - 1] = new int[_size -1];
+            }
+        } catch (...) {
+            #ifndef NDEBUG
+            std::cout << "~ Error while trying to allocate memory" << std::endl;
+            #endif
+            _del();
+            throw std::bad_alloc();
         }
 
         /**

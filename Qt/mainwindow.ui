@@ -593,9 +593,9 @@
             <colorrole role="WindowText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>186</red>
+               <green>189</green>
+               <blue>182</blue>
               </color>
              </brush>
             </colorrole>
@@ -757,9 +757,9 @@
             <colorrole role="WindowText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>186</red>
+               <green>189</green>
+               <blue>182</blue>
               </color>
              </brush>
             </colorrole>
@@ -921,9 +921,9 @@
             <colorrole role="WindowText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>93</red>
+               <green>94</green>
+               <blue>91</blue>
               </color>
              </brush>
             </colorrole>
@@ -975,9 +975,9 @@
             <colorrole role="Text">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>93</red>
+               <green>94</green>
+               <blue>91</blue>
               </color>
              </brush>
             </colorrole>
@@ -993,9 +993,9 @@
             <colorrole role="ButtonText">
              <brush brushstyle="SolidPattern">
               <color alpha="255">
-               <red>0</red>
-               <green>0</green>
-               <blue>0</blue>
+               <red>93</red>
+               <green>94</green>
+               <blue>91</blue>
               </color>
              </brush>
             </colorrole>
@@ -1087,11 +1087,10 @@
           <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="styleSheet">
-          <string notr="true">QLabel { color: black; }
-color: rgb(211, 215, 207);</string>
+          <string notr="true"/>
          </property>
          <property name="text">
-          <string>&lt;a href=&quot;#&quot;&gt;Non ricordi come accedere al tuo account?&lt;/a&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;#&quot; style=&quot;text-decoration: none&quot;&gt;&lt;span style=&quot; color:#d3d7cf;&quot;&gt;Non ricordi come accedere al tuo account?&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>

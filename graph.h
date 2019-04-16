@@ -5,16 +5,6 @@
 #include <exception>
 
 /**
- * @brief The node has not been found
- * 
- */
-class EdgeNotFoundException: public std::exception {
-    virtual const char* what() const throw() {
-        return "Edge was not found";
-    }
-};
-
-/**
  * @brief Attempt to insert a duplicate node
  * 
  */
@@ -470,7 +460,7 @@ public:
      */
     int getArch(int i, int j) {
         if (i < 0 || i > _size - 1 || j < 0 || j > _size - 1)
-            throw EdgeNotFoundException();
+            throw IndexOutOfBoundsException();
         return _adj_matrix[i][j];
     }
 

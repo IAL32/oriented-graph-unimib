@@ -126,7 +126,7 @@ int main() {
     test(unitnumber, testnumber++);
     try {
         g2.getArch(2,2);
-    } catch(EdgeNotFoundException) { }
+    } catch(IndexOutOfBoundsException) { }
 
     test(unitnumber, testnumber++);
     try {

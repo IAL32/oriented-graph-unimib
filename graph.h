@@ -114,7 +114,7 @@ private:
      * @return true The value is either 0 or 1
      * @return false Value is not either 0 or 1
      */
-    bool _is_node_value_valid(int value) {
+    bool _is_node_value_valid(int value) const {
         return (value == 0 || value == 1);
     }
 
@@ -124,11 +124,21 @@ private:
      * @param label The identifier to check
      * @return int -1 when the label is not present in the list of identifiers. The position when it is present.
      */
-    int _node_exists(const T label) {
+    int _node_index(const T label) const {
         for (int i = 0; i < _size; i++)
             if (_isEqual(_labels[i], label))
                 return i;
         return -1;
+    }
+
+    /**
+     * @brief 
+     * 
+     * @param node 
+     * @return int 
+     */
+    bool _node_exists(int node) const {
+        return node >= 0 && node < _size;
     }
 
     /**
@@ -140,7 +150,9 @@ private:
      * @return false The arch does not exists
      */
     bool _arch_exists(const T labelFrom, const T labelTo) const {
-        return (_node_exists(labelFrom) && _node_exists(labelTo));
+        int indexFrom = _node_index(labelFrom);
+        int indexTo = _node_index(labelTo);
+        return _arch_exists(indexFrom, indexTo);
     }
 
     /**
@@ -152,7 +164,9 @@ private:
      * @return false The arch does not exists
      */
     bool _arch_exists(const int indexFrom, const int indexTo) const {
-        return (indexFrom >= 0 && indexFrom < _size && indexTo >= 0 && indexTo < _size);
+        if (!_node_exists(indexFrom) || !_node_exists(indexTo))
+            throw IndexOutOfBoundsException();
+        return _adj_matrix[indexFrom][indexTo] == 1;
     }
 
 public:
@@ -202,13 +216,13 @@ public:
      * @return int*& 
      */
     T &operator[](int index) {
-        if (!(index < _size))
+        if (!_node_exists(index))
             throw IndexOutOfBoundsException();
         return _labels[index];
     }
 
     const T &operator[](const unsigned int index) const {
-        if(!(index >= 0 && index < _size))
+        if(_node_exists(index) == false)
             throw IndexOutOfBoundsException();
         return _labels[index];
     }
@@ -228,7 +242,7 @@ public:
     /**
      * @brief Copy constructor for graph object
      * 
-     * @param other
+     * @param other The other graph to copy from
      */
     graph(const graph &other) : _size(0), _adj_matrix(0), _labels(0) {
         #ifndef NDEBUG
@@ -272,12 +286,14 @@ public:
      * @return true If the node is present
      * @return false If the node is absent
      */
-    bool exists(T label) {
-        return _node_exists(label) > -1;
+    bool exists(T label) const {
+        return _node_index(label) > -1;
     }
 
-    bool hasEdge(T labelFrom, T labelTo) {
-        return getArch(labelFrom, labelTo) == 1; 
+    bool hasEdge(T labelFrom, T labelTo) const {
+        if (!exists(labelFrom) || !exists(labelTo))
+            throw NodeNotFoundException();
+        return _arch_exists(labelFrom, labelTo) == 1;
     }
 
     /**
@@ -339,7 +355,7 @@ public:
      * @param label The node to remove from the graph
      */
     void remove_node(T label) {
-        int node_index = _node_exists(label);
+        int node_index = _node_index(label);
         if (node_index == -1) {
             throw NodeNotFoundException();
         }
@@ -430,9 +446,8 @@ public:
      * @param value 1 if there is no arch between **labelFrom** and **labelTo**, 0 otherwise
      */
     void setArch(T labelFrom, T labelTo, int value) {
-        int index_from = _node_exists(labelFrom);
-        int index_to = _node_exists(labelTo);
-        
+        int index_from = _node_index(labelFrom);
+        int index_to = _node_index(labelTo);
         setCell(index_from, index_to, value);
     }
 
@@ -444,7 +459,7 @@ public:
      * @param value Value to insert, either 0 or 1
      */
     void setCell(int indexFrom, int indexTo, int value) {
-        if (!(indexFrom < _size && indexTo < _size))
+        if (!_node_exists(indexFrom) || !_node_exists(indexTo))
             throw IndexOutOfBoundsException();
         if (!_is_node_value_valid(value))
             throw NodeValueNotValidException();
@@ -459,7 +474,7 @@ public:
      * @return int The value held at i, j
      */
     int getArch(int i, int j) {
-        if (i < 0 || i > _size - 1 || j < 0 || j > _size - 1)
+        if (!_node_exists(i) || !_node_exists(j))
             throw IndexOutOfBoundsException();
         return _adj_matrix[i][j];
     }
@@ -472,9 +487,8 @@ public:
      * @return int The value held from the arch **labelFrom** and **labelTo**
      */
     int getArch(T labelFrom, T labelTo) {
-        int indexFrom, indexTo;
-        indexFrom = _node_exists(labelFrom);
-        indexTo = _node_exists(labelTo);
+        int indexFrom = _node_index(labelFrom);
+        int indexTo = _node_index(labelTo);
         return getArch(indexFrom, indexTo);
     }
 

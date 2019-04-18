@@ -208,7 +208,7 @@ public:
         }
         return *this;
     }
-
+ 
     /**
      * @brief Operator for getting 
      * 

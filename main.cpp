@@ -68,6 +68,7 @@ int main() {
     int testnumber = 1;
     int catchResult = -1;
 
+    // Modulo 1
     test(unitnumber, testnumber++, "g.setArch('g', 'h', 1)");
     g.setArch('g', 'h', 1);
     assert(g.getArch('g', 'h') == 1);
@@ -83,15 +84,6 @@ int main() {
     test(unitnumber, testnumber++, "g.add_node('a')");
     g.add_node('a');
     assert(g.getArch(2, 2) == 0);
-    
-    test(unitnumber, testnumber++, "g.addNode('a')");
-
-    catchResult = -1;
-    try {
-        g.add_node('a');
-        catchResult = 0;
-    } catch (DuplicateException) { catchResult = 1; }
-    assert(catchResult == 1);
 
     test(unitnumber, testnumber++, "g.remove_node('g')");
     g.remove_node('g');
@@ -110,15 +102,17 @@ int main() {
 
     test(unitnumber, testnumber++, "g.hasEdge('a', 'h') == false");
     assert(g.hasEdge('a', 'h') == false);
-    
-    test(unitnumber, testnumber++, "g.hasEdge('b', 'h')");
-    catchResult = -1;
-    try {
-        g.hasEdge('b', 'h');
-        catchResult = 0;
-    } catch (NodeNotFoundException) { catchResult = 1; }
-    assert(catchResult == 1);
 
+    test(unitnumber, testnumber++, "g.size() == 2");
+    assert(g.size() == 2);
+
+    test(unitnumber, testnumber++, "g.archs() == 1");
+    assert(g.archs() == 1);
+
+    test(unitnumber, testnumber++, "g.print()");
+    g.print();
+
+    // Modulo 2
     unitnumber++;
     testnumber = 1;
     test(unitnumber, testnumber++, "g2 = g");
@@ -128,17 +122,27 @@ int main() {
     test(unitnumber, testnumber++, "g2[0] == 'h'");
     assert(g2[0] == 'h');
 
-    test(unitnumber, testnumber++, "g.print()");
-    g.print();
-
-    test(unitnumber, testnumber++, "g.size() == 2");
-    assert(g.size() == 2);
-
-    test(unitnumber, testnumber++, "g.archs() == 1");
-    assert(g.archs() == 1);
-
+    // Modulo 3
     unitnumber++;
     testnumber = 1;
+
+    test(unitnumber, testnumber++, "g.hasEdge('b', 'h')");
+    catchResult = -1;
+    try {
+        g.hasEdge('b', 'h');
+        catchResult = 0;
+    } catch (NodeNotFoundException) { catchResult = 1; }
+    assert(catchResult == 1);
+
+    test(unitnumber, testnumber++, "g.addNode('a')");
+
+    catchResult = -1;
+    try {
+        g.add_node('a');
+        catchResult = 0;
+    } catch (DuplicateException) { catchResult = 1; }
+    assert(catchResult == 1);
+
     test(unitnumber, testnumber++, "g2.getArch(2, 2)");
     
     catchResult = -1;
@@ -166,13 +170,18 @@ int main() {
     } catch (IndexOutOfBoundsException) { catchResult = 1; }
     assert(catchResult == 1);
 
+    // Modulo 4
 
+    unitnumber++;
+    testnumber = 1;
     test(unitnumber, testnumber++, "graph<T, E>::const_iterator");
     graph<char, _isEqualsChar>::const_iterator i, ie;
 
     test(unitnumber, testnumber++, "for (i, ie; i != ie; ++i)");
     for(i = g.begin(), ie = g.end(); i != ie; ++i)
         std::cout << *i << " " << std::endl;
+
+    // Modulo 5
 
     unitnumber++;
     testnumber = 1;

@@ -535,15 +535,15 @@ public:
         /**
          * @brief Construct a new const iterator object
          * 
-         * @param other 
+         * @param other the iterator instance to copy frm
          */
 		const_iterator(const const_iterator &other) : ptr(other.ptr), position(other.position) {}
 
         /**
          * @brief Equals operator
          * 
-         * @param other 
-         * @return const_iterator& 
+         * @param other the instance to copy from
+         * @return const_iterator& a pointer to the current instance with the updated position and pointer
          */
 		const_iterator& operator=(const const_iterator &other) {
 			ptr = other.ptr;
@@ -611,11 +611,11 @@ public:
 		}
 		
 		/**
-		 * @brief 
+		 * @brief Inequality operator
 		 * 
-		 * @param other 
-		 * @return true 
-		 * @return false 
+		 * @param other the instance to compare from
+		 * @return true if the two instances are equal
+		 * @return false if the two instances differ
 		 */
 		bool operator!=(const const_iterator &other) const {
 			return !(*this == other);
@@ -670,17 +670,15 @@ public:
 
 };
 
-
 /**
-	@brief Operatore di stream
-
-	Permette di spedire su uno stream di output il contenuto dell'array generico.
-	E' una funzione templata perche' il parametro relativo a dbufferT e' templato
-
-	@param os stream di output
-	@param g graph da utilizzare
-	@return Il riferimento allo stream di output
-**/
+ * @brief Stream operator for the graph
+ * 
+ * @tparam T the graph template
+ * @tparam E the functor for T equality/inequality
+ * @param os the stream
+ * @param g the graph
+ * @return std::ostream& a pointer to the stream
+ */
 template <typename T, typename E>
 std::ostream &operator<<(std::ostream &os, 
 	const graph<T, E> &g) {

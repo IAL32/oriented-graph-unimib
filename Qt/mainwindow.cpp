@@ -90,7 +90,7 @@ void MainWindow::signup() {
         } else if (user::isPhoneNumber(emailOrPhone)) {
             u.setEmail("");
             u.setPhoneNumber(emailOrPhone);
-        }
+        } else throw PhoneOrEmailFormatNotValidException();
         u.setGender(gender);
         u.setName(name);
         u.setSurname(surname);
@@ -103,9 +103,7 @@ void MainWindow::signup() {
 
     } catch(UserAlreadyRegisteredException) {
         errorDialog("User with same email or phone number already exists!");
-    } catch (EmailFormatNotValidException) {
-        errorDialog("Email or phone not in a valid format!");
-    } catch (PhoneNumberFormatNotValidException) {
+    } catch (PhoneOrEmailFormatNotValidException) {
         errorDialog("Email or phone not in a valid format!");
     } catch (DateNotValidException) {
         errorDialog("The date you selected is not valid!");

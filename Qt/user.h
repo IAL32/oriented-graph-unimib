@@ -8,6 +8,8 @@
 
 class StringFormatNotValidException {};
 
+class PhoneOrEmailFormatNotValidException {};
+
 class PhoneNumberFormatNotValidException {};
 
 class EmailFormatNotValidException {};

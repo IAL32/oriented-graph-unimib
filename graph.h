@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <exception>
+#include <stddef.h>
 
 /**
  * @brief Attempt to insert a duplicate node

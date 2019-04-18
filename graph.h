@@ -210,10 +210,10 @@ public:
     }
  
     /**
-     * @brief Operator for getting 
+     * @brief Operator for getting a node using its index
      * 
-     * @param index 
-     * @return int*& 
+     * @param index Node index in the node list
+     * @return T& The node
      */
     T &operator[](int index) {
         if (!_node_exists(index))
@@ -221,6 +221,12 @@ public:
         return _labels[index];
     }
 
+    /**
+     * @brief Operator for getting a node using its index
+     * 
+     * @param index Node index in the node list
+     * @return T& The node
+     */
     const T &operator[](const unsigned int index) const {
         if(_node_exists(index) == false)
             throw IndexOutOfBoundsException();
@@ -228,9 +234,9 @@ public:
     }
 
     /**
-     * @brief Distruttore
+     * @brief Graph disctructor
      *
-     * Distruttore. Rimuove la memoria allocata da graph.
+     * Removes all memory allocated by this graph instance
     **/
     ~graph() {
         #ifndef NDEBUG

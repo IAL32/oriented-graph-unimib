@@ -14,6 +14,13 @@ Ho scelto di rappresentare la matrice di adiacenza del grafo orientato nella seg
 Ho inoltre scelto di rappresentare gli identificativi dei nodi con un puntatore al tipo generico `T`.
 I commenti sono deliberatamente scritti in inglese, poiché al termine della valutazione, il progetto verrà pubblicato sul [mio profilo su GitHub](https://github.com/IAL32/oriented-graph-unimib).
 
+Dopo aver effettuato un test mandando un'email a 
+corsocpp.ciocca@gmail.com , sono emersi degli errori che non compaiono nella compilazione in locale, in particolare il seguente:
+
+`‘ptrdiff_t’ does not name a type`
+
+Questo errore è stato risolto usando il metodo riportato nel [forum di Qt](https://forum.qt.io/topic/16531/error-ptrdiff_t-does-not-name-a-type), cioè inserendo un header aggiuntivo nel file `graph.h`. L'header in questione è `#include <stddef.h>`, che definisce `ptrdiff_t`.
+
 ## Implementazione del grafo
 
 Come da specifica e comunicazioni successive, non sono state utilizzate liste per rappresentare la matrice di adiacenza e la lista dei nodi.

@@ -49,6 +49,7 @@ user database::findUserByPhoneNumber(QString phoneNumber) {
 }
 
 user database::findUserByEmail(QString email) {
+    email = email.toLower();
     if (!user::isEmail(email))
         throw EmailFormatNotValidException();
     std::list<user>::iterator i, ie;
@@ -63,10 +64,10 @@ user database::findUserByPhoneNumberOrEmail(QString phoneNumberOrEmail) {
         return findUserByEmail(phoneNumberOrEmail);
     else if (user::isPhoneNumber(phoneNumberOrEmail))
         return findUserByPhoneNumber(phoneNumberOrEmail);
-    else throw UserNotFoundException();
+    else throw StringFormatNotValidException();
 }
 
-bool database::userExistsByPhoneNumber(const QString phoneNumber) {
+bool database::userExistsByPhoneNumber(QString phoneNumber) {
     if (!user::isPhoneNumber(phoneNumber))
         throw PhoneNumberFormatNotValidException();
     std::list<user>::const_iterator i, ie;
@@ -77,24 +78,22 @@ bool database::userExistsByPhoneNumber(const QString phoneNumber) {
     return false;
 }
 
-bool database::userExistsByEmail(const QString email) {
+bool database::userExistsByEmail(QString email) {
     if (!user::isEmail(email))
         throw EmailFormatNotValidException();
     std::list<user>::const_iterator i, ie;
 
+    email = email.toLower();
     for (i = _users.begin(), ie = _users.end(); i != ie; ++i)
         if (i->getEmail() == email)
             return true;
     return false;
 }
 
-bool database::userExists(const user u) {
+bool database::userExists(const user u) const {
     std::list<user>::const_iterator i, ie;
     for (i = _users.begin(), ie = _users.end(); i != ie; ++i) {
-        if (!u.getPhoneNumber().isEmpty() && !i->getPhoneNumber().isEmpty() && u.getPhoneNumber() == i->getPhoneNumber())
-            return true;
-        if (!u.getEmail().isEmpty() && !i->getEmail().isEmpty() && u.getEmail() == i->getEmail())
-            return true;
+        if (u == *i) return true;
     }
     return false;
 }
@@ -124,6 +123,8 @@ void database::save() {
 }
 
 user database::login(QString phoneOrEmail, QString password) {
+    if (!user::isStringValid(password))
+        throw StringFormatNotValidException();
     user u = findUserByPhoneNumberOrEmail(phoneOrEmail);
     if (u.getPassword() != password)
         throw CredentialsNotCorrectException();

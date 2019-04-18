@@ -49,7 +49,7 @@ public:
 
     bool userExistsByEmailPassword(const QString email, const QString password);
 
-    bool userExists(const user u);
+    bool userExists(const user u) const;
 
     QString toString(void) const;
 

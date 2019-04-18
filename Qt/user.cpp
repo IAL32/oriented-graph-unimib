@@ -6,11 +6,11 @@ QString user::EMAIL_PATTERN = "^[0-9a-zA-Z_\\-\\.]+@[0-9a-zA-Z_\\-\\.]+\\.[0-9a-
 
 void user::init(QString phoneNumber, QString name, QString surname, Gender gender, QDate birthday, QString password, QString email, Role role) {
     setPhoneNumber(phoneNumber);
-    _name = name;
-    _surname = surname;
+    setName(name);
+    setSurname(surname);
     _gender = gender;
     setBirthday(birthday);
-    _password = password;
+    setPassword(password);
     setEmail(email);
     _role = role;
 }
@@ -21,13 +21,15 @@ user::user(QString phoneNumber, QString name, QString surname, Gender gender, QD
     init(phoneNumber, name, surname, gender, birthday, password, email, role);
 }
 
-bool user::operator==(const user &other) {
-    if (!_email.isEmpty() && !_phoneNumber.isEmpty() && !other.getEmail().isEmpty() && !other.getPhoneNumber().isEmpty())
-        return _email == other.getEmail() || _phoneNumber == other.getPhoneNumber();
+bool user::operator==(const user &other) const {
+    if (!_email.isEmpty() && !other.getEmail().isEmpty())
+        return _email.toLower() == other.getEmail().toLower();
+    if (!_phoneNumber.isEmpty() && !other.getPhoneNumber().isEmpty())
+        return _phoneNumber == other.getPhoneNumber();
     return false;
 }
 
-bool user::operator!=(const user &other) {
+bool user::operator!=(const user &other) const {
     return !(*this == other);
 }
 
@@ -39,10 +41,18 @@ void user::setPhoneNumber(QString phoneNumber) {
 }
 
 QString user::getName() const { return _name; }
-void user::setName(QString name) { _name = name; }
+void user::setName(QString name) {
+    if (!user::isStringValid(name))
+        throw StringFormatNotValidException();
+    _name = name;
+}
 
 QString user::getSurname() const { return _surname; }
-void user::setSurname(QString surname) { _surname = surname; }
+void user::setSurname(QString surname) {
+    if (!user::isStringValid(surname))
+        throw StringFormatNotValidException();
+    _surname = surname;
+}
 
 user::Gender user::getGender() {
     return _gender;
@@ -70,7 +80,11 @@ void user::setBirthdayFromString(QString birthday) {
 }
 
 QString user::getPassword(void) const {return _password; }
-void user::setPassword(QString password) { _password = password; }
+void user::setPassword(QString password) {
+    if (!user::isStringValid(password))
+        throw StringFormatNotValidException();
+    _password = password;
+}
 
 QString user::getEmail(void) const { return _email; }
 void user::setEmail(QString email) {
@@ -100,6 +114,10 @@ QString user::getRoleString() const {
 void user::setRole(Role role) { _role = role; }
 bool user::isAdmin() const { return _role == user::Role::ADMIN; }
 bool user::isUser() const { return _role == user::Role::USER; }
+
+bool user::isStringValid(QString str) {
+    return !str.contains(',');
+}
 
 user user::fromString(QString csvUser) {
     std::istringstream input(csvUser.toStdString());

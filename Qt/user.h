@@ -64,9 +64,9 @@ public:
 
     user();
 
-    bool operator==(const user &other);
+    bool operator==(const user &other) const;
 
-    bool operator!=(const user &other);
+    bool operator!=(const user &other) const;
 
     explicit user(QString phoneNumber, QString name, QString surname, Gender gender, QDate birthday, QString password, QString email, Role role);
 
@@ -106,6 +106,8 @@ public:
     void setRole(Role role);
     bool isAdmin(void) const;
     bool isUser(void) const;
+
+    static bool isStringValid(QString str);
 
     static user fromString(QString csvUser);
     QString toString(void) const;

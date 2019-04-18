@@ -47,8 +47,20 @@ void MainWindow::setup() {
     db = database(QDir::currentPath() + "/data.csv");
 }
 
-void MainWindow::on_btnRegister_clicked()
-{
+void MainWindow::errorDialog(QString error) {
+    QMessageBox::critical(this, ui->statusBar->windowTitle(), error);
+}
+
+void MainWindow::infoDialog(QString info) {
+    QMessageBox::information(this, ui->statusBar->windowTitle(), info);
+}
+
+void MainWindow::showAdminWindow() {
+    myAdminDialog = new AdminDialog(&db, this);
+    myAdminDialog->exec();
+}
+
+void MainWindow::signup() {
     QString name, surname, emailOrPhone, day, month, year, password;
     QDate qBirthday;
     user::Gender gender;
@@ -97,11 +109,12 @@ void MainWindow::on_btnRegister_clicked()
         errorDialog("Email or phone not in a valid format!");
     } catch (DateNotValidException) {
         errorDialog("The date you selected is not valid!");
+    } catch (StringFormatNotValidException) {
+        errorDialog("Name, surname or password must NOT contain a comma (,)!");
     }
 }
 
-void MainWindow::on_btnLogin_clicked()
-{
+void MainWindow::login() {
     QString phoneOrEmail, password;
     user u;
 
@@ -120,18 +133,20 @@ void MainWindow::on_btnLogin_clicked()
         } else {
             infoDialog("Wonderful! You logged in succesfully!");
         }
-    } catch(EmailFormatNotValidException) {
-        errorDialog("Email or number not in a valid format!");
-    } catch (PhoneNumberFormatNotValidException) {
-        errorDialog("Email or number not in a valid format!");
     } catch (UserNotFoundException) {
         errorDialog("User was not found!");
-        return;
     } catch (CredentialsNotCorrectException) {
         errorDialog("Login credentials are not correct!");
-        return;
+    } catch (StringFormatNotValidException) {
+        errorDialog("Email, number or password not in a valid format!");
     }
 }
+
+void MainWindow::on_btnLogin_clicked() { login(); }
+
+void MainWindow::on_txtLEmailPhone_returnPressed() { login(); }
+
+void MainWindow::on_txtLPassword_returnPressed() { login(); }
 
 void MainWindow::on_label_linkActivated(const QString &link)
 {
@@ -154,15 +169,4 @@ void MainWindow::on_label_linkActivated(const QString &link)
     }
 }
 
-void MainWindow::errorDialog(QString error) {
-    QMessageBox::critical(this, ui->statusBar->windowTitle(), error);
-}
-
-void MainWindow::infoDialog(QString info) {
-    QMessageBox::information(this, ui->statusBar->windowTitle(), info);
-}
-
-void MainWindow::showAdminWindow() {
-    myAdminDialog = new AdminDialog(&db, this);
-    myAdminDialog->exec();
-}
+void MainWindow::on_btnRegister_clicked() { signup(); }

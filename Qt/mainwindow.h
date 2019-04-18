@@ -25,6 +25,10 @@ private slots:
 
     void on_label_linkActivated(const QString &link);
 
+    void on_txtLEmailPhone_returnPressed();
+
+    void on_txtLPassword_returnPressed();
+
 private:
     Ui::MainWindow *ui;
     database db;
@@ -35,6 +39,8 @@ private:
     void errorDialog(QString error);
     void infoDialog(QString info);
     void showAdminWindow(void);
+    void signup(void);
+    void login(void);
 };
 
 #endif // MAINWINDOW_H
